@@ -80,3 +80,4 @@ public class AwsSignedRestRequest implements Closeable {
         httpClient.close();
     }
 }
+

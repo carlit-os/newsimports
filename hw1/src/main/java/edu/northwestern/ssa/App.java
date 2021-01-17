@@ -49,10 +49,8 @@ public class App {
         for(ArchiveRecord record: library){
             byte[] bArr = new byte[record.available()]; //constructs array to dump read contents
 
-            int endDoc = 0;
-
-            while (endDoc != -1) { //record is finished reading when read returns -1
-                endDoc = record.read(bArr); //read HTTP response record
+            while (record.available() != 0) { //record is finished reading when read returns -1
+                record.read(bArr); //read HTTP response record
             }
 
             //bArr now has the contents of the record dumped in

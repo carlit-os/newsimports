@@ -43,10 +43,10 @@ public class App {
         sClient.close();
 
         //step 2 parsing
-        ArchiveReader parser = WARCReaderFactory.get(warcHolder);
+        ArchiveReader library = WARCReaderFactory.get(warcHolder);
 
         //each record is an HTTP response
-        for(ArchiveRecord record: parser){
+        for(ArchiveRecord record: library){
             byte[] bArr = new byte[record.available()]; //constructs array to dump read contents
 
             int endDoc = 0;

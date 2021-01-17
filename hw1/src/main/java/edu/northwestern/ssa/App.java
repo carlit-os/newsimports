@@ -1,6 +1,8 @@
 package edu.northwestern.ssa;
 
 
+import org.archive.io.ArchiveReader;
+import org.archive.io.ArchiveRecord;
 import org.archive.io.warc.WARCReaderFactory;
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
@@ -10,11 +12,12 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.Duration;
 
 
 public class App {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         System.out.println("Hello world!");
 
         //Create S3CLient object
@@ -33,12 +36,36 @@ public class App {
         //create file to write to
         File warcHolder = new File("initialWARC.txt");
 
+
         sClient.getObject(sRequest, ResponseTransformer.toFile(warcHolder));
 
+        //s requests have concluded
         sClient.close();
 
+        //step 2 parsing
+        ArchiveReader parser = WARCReaderFactory.get(warcHolder);
+
+        //each record is an HTTP response
+        for(ArchiveRecord record: parser){
+            byte[] bArr = new byte[record.available()]; //constructs array to dump read contents
+
+            int endDoc = 0;
+
+            while (endDoc != -1) { //record is finished reading when read returns -1
+                endDoc = record.read(bArr); //read HTTP response record
+            }
+
+            //bArr now has the contents of the record dumped in
+            //convert bArr to string
+
+        }
 
 
+        //end of parse
+
+        warcHolder.delete();
 
     }
+
+
 }

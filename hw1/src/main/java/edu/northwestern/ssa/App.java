@@ -11,12 +11,13 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 
 public class App {
+
     public static void main(String[] args) throws IOException {
         System.out.println("Hello world!");
 
@@ -34,7 +35,7 @@ public class App {
                 .build();
 
         //create file to write to
-        File warcHolder = new File("initialWARC.txt");
+        File warcHolder = new File("initialWARC.warc");
 
 
         sClient.getObject(sRequest, ResponseTransformer.toFile(warcHolder));
@@ -48,13 +49,56 @@ public class App {
         //each record is an HTTP response
         for(ArchiveRecord record: library){
             byte[] bArr = new byte[record.available()]; //constructs array to dump read contents
+            record.read(bArr);
+            String rawStr = new String(bArr, StandardCharsets.UTF_8); //consider experimenting with charsets on string declr and inputstream declr
+
+            InputStream inputStream = new ByteArrayInputStream(rawStr.getBytes());
 
 
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+            int nRead;
+            //byte[] data = new byte[1024]; try using bArr in place
+
+            while ((nRead = inputStream.read(bArr, 0, bArr.length)) != -1) {
+                buffer.write(bArr, 0, nRead);
+            }
+
+            buffer.flush();
+            byte[] byteArray = buffer.toByteArray();
+
+            String text = new String(byteArray, StandardCharsets.UTF_8);
+
+            //assertThat(text, equalTo(originalString)); looks like a unit test
+            //https://www.baeldung.com/convert-input-stream-to-string
+            //start from https://www.programcreek.com/java-api-examples/?api=org.archive.io.warc.WARCReaderFactory
+            //original function
+
+            /*
+            //while (record.available() != 0) {
             record.read(bArr); //read HTTP response record
-
+            //}
 
             //bArr now has the contents of the record dumped in
             //convert bArr to string
+            // byte[] to string https://mkyong.com/java/how-do-convert-byte-array-to-string-in-java/
+
+            String transRecord = new String(bArr, StandardCharsets.UTF_8);
+
+             */
+            String url = record.getHeader().getUrl();
+
+            String html  = text.substring(text.indexOf("\r\n\r\n")+4);
+
+            //System.out.println(url);
+
+
+
+
+            System.out.println(text);
+            System.out.println("\n");
+
+
 
         }
 
@@ -64,6 +108,13 @@ public class App {
         warcHolder.delete();
 
     }
+
+
+
+
+
+
+
 
 
 }

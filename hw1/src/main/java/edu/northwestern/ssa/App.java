@@ -11,8 +11,9 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 
@@ -34,7 +35,7 @@ public class App {
                 .build();
 
         //create file to write to
-        File warcHolder = new File("initialWARC.txt");
+        File warcHolder = new File("initialWARC.warc");
 
 
         sClient.getObject(sRequest, ResponseTransformer.toFile(warcHolder));
@@ -46,15 +47,44 @@ public class App {
         ArchiveReader library = WARCReaderFactory.get(warcHolder);
 
         //each record is an HTTP response
+
+        //-------------------------------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------------------
+
+
         for(ArchiveRecord record: library){
-            byte[] bArr = new byte[record.available()]; //constructs array to dump read contents
+
+            //byte[] bArr = new byte[record.available()]; //constructs array to dump read contents
+
+            //while (record.available() != 0) {
+            //record.read(bArr); //read HTTP response record
+            //}
+
+            String responseStr = record.toString(); //convert ot string type
 
 
-            record.read(bArr); //read HTTP response record
 
+            Object wType = record.getHeader().getHeaderValue("WARC-Type");
+            //if this is a response, we care about it
 
-            //bArr now has the contents of the record dumped in
-            //convert bArr to string
+            String url = record.getHeader().getUrl(); //examine URL
+            System.out.println(url);
+
+            //inputstream take2 method4
+
+            InputStream inputStream = new ByteArrayInputStream(responseStr.getBytes());
+
+            StringBuilder textBuilder = new StringBuilder();
+            try (Reader reader = new BufferedReader(new InputStreamReader
+                    (inputStream, Charset.forName(StandardCharsets.UTF_8.name())))) {
+                int c = 0;
+                while ((c = reader.read()) != -1) {
+                    textBuilder.append((char) c);
+                }
+            }
+
+            System.out.println(textBuilder.toString());
+
 
         }
 

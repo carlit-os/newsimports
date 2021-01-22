@@ -4,6 +4,8 @@ package edu.northwestern.ssa;
 import org.archive.io.ArchiveReader;
 import org.archive.io.ArchiveRecord;
 import org.archive.io.warc.WARCReaderFactory;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.regions.Region;
@@ -100,16 +102,16 @@ public class App {
             Object wType = record.getHeader().getHeaderValue("WARC-Type"); //if this is response, we jsoup
 
 
-            String html  = text.substring(text.indexOf("\r\n\r\n")+4);
+            String htmlRaw  = text.substring(text.indexOf("\r\n\r\n")+4);
 
-            //System.out.println(url);
+           ////////////////step 3 jsoup
 
+            Document htmlDoc = Jsoup.parse(htmlRaw);
 
+            String title = htmlDoc.title();
+            String plainText = htmlDoc.text();
 
-
-            System.out.println(text);
-            System.out.println("\n");
-
+            //TODO:extract goodies only if wtype is response
 
 
         }

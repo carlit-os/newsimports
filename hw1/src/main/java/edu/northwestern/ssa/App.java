@@ -19,9 +19,15 @@ import java.time.Duration;
 
 
 public class App {
+    private static final String AWS_ACCESS_KEY_ID = System.getenv("AWS_ACCESS_KEY_ID");
+    private static final String AWS_SECRET_ACCESS_KEY = System.getenv("AWS_SECRET_ACCESS_KEY");
 
+    //TODO add sources
     public static void main(String[] args) throws IOException {
         System.out.println("Hello world!");
+
+        int pageCount = 0;
+
 
         //Create S3CLient object
         S3Client sClient = S3Client.builder()
@@ -112,6 +118,7 @@ public class App {
                 String url = record.getHeader().getUrl();
                 String title = htmlDoc.title();
                 String plainText = htmlDoc.text();
+                pageCount += 1;
             }
 
 
@@ -120,7 +127,7 @@ public class App {
 
 
         //end of parse
-
+        System.out.println("This many responses:" + pageCount);
         warcHolder.delete();
 
     }

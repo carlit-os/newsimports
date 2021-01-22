@@ -51,6 +51,7 @@ public class App {
 
         //each record is an HTTP response
         for(ArchiveRecord record: library){
+            Object wType = record.getHeader().getHeaderValue("WARC-Type"); //if this is response, we jsoup
             byte[] bArr = new byte[record.available()]; //constructs array to dump read contents
 
 
@@ -98,20 +99,21 @@ public class App {
              */
 
             //goodies
-            String url = record.getHeader().getUrl();
-            Object wType = record.getHeader().getHeaderValue("WARC-Type"); //if this is response, we jsoup
 
 
-            String htmlRaw  = text.substring(text.indexOf("\r\n\r\n")+4);
+
+
+
 
            ////////////////step 3 jsoup
+            if (wType.equals("response")) {
+                String htmlRaw = text.substring(text.indexOf("\r\n\r\n") + 4);
+                Document htmlDoc = Jsoup.parse(htmlRaw);
+                String url = record.getHeader().getUrl();
+                String title = htmlDoc.title();
+                String plainText = htmlDoc.text();
+            }
 
-            Document htmlDoc = Jsoup.parse(htmlRaw);
-
-            String title = htmlDoc.title();
-            String plainText = htmlDoc.text();
-
-            //TODO:extract goodies only if wtype is response
 
 
         }

@@ -50,20 +50,27 @@ public class App {
         //each record is an HTTP response
         for(ArchiveRecord record: library){
             byte[] bArr = new byte[record.available()]; //constructs array to dump read contents
-            record.read(bArr);
-            String rawStr = new String(bArr, StandardCharsets.UTF_8); //consider experimenting with charsets on string declr and inputstream declr
 
-            InputStream inputStream = new ByteArrayInputStream(rawStr.getBytes());
 
+            // String rawStr = bArr.toString();
+
+
+            //String rawStr = new String(bArr, StandardCharsets.UTF_8); //consider experimenting with charsets on string declr and inputstream declr
+            //InputStream tempStream = new ByteArrayInputStream(record);
+
+            //InputStream inputStream = new ByteArrayInputStream(rawStr.getBytes());
 
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            record.dump(buffer);
 
+            /* remove if dumping works
             int nRead;
-            //byte[] data = new byte[1024]; try using bArr in place
+            byte[] data = new byte[1024]; //try using bArr in place
 
-            while ((nRead = inputStream.read(bArr, 0, bArr.length)) != -1) {
-                buffer.write(bArr, 0, nRead);
+            while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
             }
+            */
 
             buffer.flush();
             byte[] byteArray = buffer.toByteArray();
@@ -87,7 +94,11 @@ public class App {
             String transRecord = new String(bArr, StandardCharsets.UTF_8);
 
              */
+
+            //goodies
             String url = record.getHeader().getUrl();
+            Object wType = record.getHeader().getHeaderValue("WARC-Type"); //if this is response, we jsoup
+
 
             String html  = text.substring(text.indexOf("\r\n\r\n")+4);
 

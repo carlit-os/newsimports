@@ -34,7 +34,7 @@ public class App {
                 .build();
 
         //create file to write to
-        File warcHolder = new File("initialWARC.txt");
+        File warcHolder = new File("initialWARC.warc");
 
 
         sClient.getObject(sRequest, ResponseTransformer.toFile(warcHolder));

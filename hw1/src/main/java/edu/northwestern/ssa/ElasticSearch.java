@@ -1,6 +1,7 @@
 package edu.northwestern.ssa;
 
 import netscape.javascript.JSObject;
+import org.json.JSONObject;
 import software.amazon.awssdk.http.SdkHttpMethod;
 
 import java.io.IOException;
@@ -32,10 +33,16 @@ public class ElasticSearch extends AwsSignedRestRequest {
 
 
     //postdoc method
-    public void postDoc(JSObject jGoodies){
-        String postHost = ELASTIC_SEARCH_HOST + "/_doc/";
+    public void postDoc(JSONObject jGoodies) throws IOException {
+        String postIdx = ELASTIC_SEARCH_INDEX + "/_doc/";
 
-        restRequest(SdkHttpMethod.POST,ELASTIC_SEARCH_HOST,postHost,);
+        Optional<JSONObject> oPjGoodies= Optional.of(jGoodies);
+
+        restRequest(SdkHttpMethod.POST,ELASTIC_SEARCH_HOST,postIdx,Optional.empty(),oPjGoodies);
+
+
+
+        //TODO:handle queryparams for minnesota twins #229
     }
 
 

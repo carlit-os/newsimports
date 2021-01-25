@@ -4,6 +4,7 @@ package edu.northwestern.ssa;
 import org.archive.io.ArchiveReader;
 import org.archive.io.ArchiveRecord;
 import org.archive.io.warc.WARCReaderFactory;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
@@ -132,14 +133,27 @@ public class App {
 
 
 
-           ////////////////step 3 jsoup
+           ////////////////step 3 jsoup + call to post
             if (wType.equals("response")) {
                 String htmlRaw = text.substring(text.indexOf("\r\n\r\n") + 4);
                 Document htmlDoc = Jsoup.parse(htmlRaw);
                 String url = record.getHeader().getUrl();
                 String title = htmlDoc.title();
                 String plainText = htmlDoc.text();
+
                 pageCount += 1;
+
+                //JSON construction https://www.tutorialspoint.com/json/json_java_example.htm
+
+                JSONObject goodies  = new JSONObject();
+
+                goodies.put("title", title);
+                goodies.put("txt", plainText);
+                goodies.put("url", url);
+                //post
+                es.postDoc(goodies);
+
+
             }
 
 

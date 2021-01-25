@@ -4,6 +4,7 @@ package edu.northwestern.ssa;
 import org.archive.io.ArchiveReader;
 import org.archive.io.ArchiveRecord;
 import org.archive.io.warc.WARCReaderFactory;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -33,6 +34,7 @@ public class App {
         System.out.println("Hello world!");
 
         int pageCount = 0;
+
 
 
 
@@ -78,21 +80,22 @@ public class App {
 
         //
         // each record is an HTTP response
-        for(ArchiveRecord record: library){
-            Object wType = record.getHeader().getHeaderValue("WARC-Type"); //if this is response, we jsoup
-            byte[] bArr = new byte[record.available()]; //constructs array to dump read contents
+        try {
+            for (ArchiveRecord record : library) {
+                Object wType = record.getHeader().getHeaderValue("WARC-Type"); //if this is response, we jsoup
+                byte[] bArr = new byte[record.available()]; //constructs array to dump read contents
 
 
-            // String rawStr = bArr.toString();
+                // String rawStr = bArr.toString();
 
 
-            //String rawStr = new String(bArr, StandardCharsets.UTF_8); //consider experimenting with charsets on string declr and inputstream declr
-            //InputStream tempStream = new ByteArrayInputStream(record);
+                //String rawStr = new String(bArr, StandardCharsets.UTF_8); //consider experimenting with charsets on string declr and inputstream declr
+                //InputStream tempStream = new ByteArrayInputStream(record);
 
-            //InputStream inputStream = new ByteArrayInputStream(rawStr.getBytes());
+                //InputStream inputStream = new ByteArrayInputStream(rawStr.getBytes());
 
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            record.dump(buffer);
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                record.dump(buffer);
 
             /* remove if dumping works
             int nRead;
@@ -103,15 +106,15 @@ public class App {
             }
             */
 
-            buffer.flush();
-            byte[] byteArray = buffer.toByteArray();
+                buffer.flush();
+                byte[] byteArray = buffer.toByteArray();
 
-            String text = new String(byteArray, StandardCharsets.UTF_8);
+                String text = new String(byteArray, StandardCharsets.UTF_8);
 
-            //assertThat(text, equalTo(originalString)); looks like a unit test
-            //https://www.baeldung.com/convert-input-stream-to-string
-            //start from https://www.programcreek.com/java-api-examples/?api=org.archive.io.warc.WARCReaderFactory
-            //original function
+                //assertThat(text, equalTo(originalString)); looks like a unit test
+                //https://www.baeldung.com/convert-input-stream-to-string
+                //start from https://www.programcreek.com/java-api-examples/?api=org.archive.io.warc.WARCReaderFactory
+                //original function
 
             /*
             //while (record.available() != 0) {
@@ -126,48 +129,51 @@ public class App {
 
              */
 
-            //goodies
+                //goodies
 
 
+                ////////////////step 3 jsoup + call to post
+                if (wType.equals("response")) {
+                    String htmlRaw = text.substring(text.indexOf("\r\n\r\n") + 4);
+                    Document htmlDoc = Jsoup.parse(htmlRaw);
+                    String url = record.getHeader().getUrl();
+                    String title = htmlDoc.title();
+                    String plainText = htmlDoc.text();
+
+                    pageCount += 1;
+
+                    //JSON construction https://www.tutorialspoint.com/json/json_java_example.htm
+
+                    JSONObject goodies = new JSONObject();
+
+                    goodies.put("txt", plainText);
+                    goodies.put("title", title);
+                    goodies.put("url", url);
+                    //post
+                    es.postDoc(goodies);
 
 
-
-
-           ////////////////step 3 jsoup + call to post
-            if (wType.equals("response")) {
-                String htmlRaw = text.substring(text.indexOf("\r\n\r\n") + 4);
-                Document htmlDoc = Jsoup.parse(htmlRaw);
-                String url = record.getHeader().getUrl();
-                String title = htmlDoc.title();
-                String plainText = htmlDoc.text();
-
-                pageCount += 1;
-
-                //JSON construction https://www.tutorialspoint.com/json/json_java_example.htm
-
-                JSONObject goodies  = new JSONObject();
-
-                goodies.put("title", title);
-                goodies.put("txt", plainText);
-                goodies.put("url", url);
-                //post
-                es.postDoc(goodies);
+                }
 
 
             }
 
+            System.out.println("This many responses:" + pageCount);
+            //end of parse
+            es.deleteIndex();
+            es.close();
 
 
+            warcHolder.delete();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } finally {
+            es.deleteIndex();
+            es.close();
+            warcHolder.delete();
         }
-
-        System.out.println("This many responses:" + pageCount);
-        //end of parse
-        es.deleteIndex();
-        es.close();
-
-
-
-        warcHolder.delete();
 
     }
 

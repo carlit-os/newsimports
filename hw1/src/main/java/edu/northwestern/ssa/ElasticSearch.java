@@ -1,7 +1,10 @@
 package edu.northwestern.ssa;
 
 import netscape.javascript.JSObject;
+import org.json.HTTP;
 import org.json.JSONObject;
+import software.amazon.awssdk.http.HttpExecuteRequest;
+import software.amazon.awssdk.http.HttpExecuteResponse;
 import software.amazon.awssdk.http.SdkHttpMethod;
 
 import java.io.IOException;
@@ -22,12 +25,16 @@ public class ElasticSearch extends AwsSignedRestRequest {
 
     //create index method
     public void createIndex() throws IOException {
-        restRequest(SdkHttpMethod.PUT,ELASTIC_SEARCH_HOST,ELASTIC_SEARCH_INDEX, Optional.empty());
+        HttpExecuteResponse table = this.restRequest(SdkHttpMethod.PUT,ELASTIC_SEARCH_HOST,ELASTIC_SEARCH_INDEX, Optional.empty());
+
+        table.responseBody().get().close(); //do I need to close this when I create an index or just when postng??
     }
 
     //delete index method
     public void deleteIndex() throws IOException {
-        restRequest(SdkHttpMethod.DELETE,ELASTIC_SEARCH_HOST,ELASTIC_SEARCH_INDEX, Optional.empty());
+        HttpExecuteResponse erase = this.restRequest(SdkHttpMethod.DELETE,ELASTIC_SEARCH_HOST,ELASTIC_SEARCH_INDEX, Optional.empty());
+
+        erase.responseBody().get().close(); // is this necessary?
     }
 
 
@@ -38,9 +45,9 @@ public class ElasticSearch extends AwsSignedRestRequest {
 
         Optional<JSONObject> oPjGoodies= Optional.of(jGoodies);
 
-        restRequest(SdkHttpMethod.POST,ELASTIC_SEARCH_HOST,postIdx,Optional.empty(),oPjGoodies);
+        HttpExecuteResponse postit = this.restRequest(SdkHttpMethod.POST,ELASTIC_SEARCH_HOST,postIdx,Optional.empty(),oPjGoodies);
 
-
+        postit.responseBody().get().close();
 
         //TODO:handle queryparams for minnesota twins #229
     }

@@ -22,7 +22,7 @@ public class App {
     private static final String AWS_ACCESS_KEY_ID = System.getenv("AWS_ACCESS_KEY_ID");
     private static final String AWS_SECRET_ACCESS_KEY = System.getenv("AWS_SECRET_ACCESS_KEY");
     private static final String ELASTIC_SEARCH_HOST = System.getenv("ELASTIC_SEARCH_HOST");
-    private static final String COMMON_CRAWL_FILENAME = System.getenv("COMMON_CRAWL_FILENAME");
+    private static String COMMON_CRAWL_FILENAME = System.getenv("COMMON_CRAWL_FILENAME");
 
 
 
@@ -63,10 +63,18 @@ public class App {
         sClient.close();
         //-------------------------------------------------------------------------------------------------------------
         //-------------------------------------------------------------------------------------------------------------
+
+
+
         //step 2 parsing
         ArchiveReader library = WARCReaderFactory.get(warcHolder);
 
-        //ElasticSearch es = new ElasticSearch("es"); pair with es.close()
+        //create index
+        ElasticSearch es = new ElasticSearch("es"); //pair with es.close();
+        es.createIndex();
+
+
+
         //
         // each record is an HTTP response
         for(ArchiveRecord record: library){
@@ -138,9 +146,13 @@ public class App {
 
         }
 
-
-        //end of parse
         System.out.println("This many responses:" + pageCount);
+        //end of parse
+        es.deleteIndex();
+        es.close();
+
+
+
         warcHolder.delete();
 
     }

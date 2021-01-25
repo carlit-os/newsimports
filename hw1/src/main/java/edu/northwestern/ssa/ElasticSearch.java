@@ -1,5 +1,6 @@
 package edu.northwestern.ssa;
 
+import netscape.javascript.JSObject;
 import software.amazon.awssdk.http.SdkHttpMethod;
 
 import java.io.IOException;
@@ -23,14 +24,19 @@ public class ElasticSearch extends AwsSignedRestRequest {
         restRequest(SdkHttpMethod.PUT,ELASTIC_SEARCH_HOST,ELASTIC_SEARCH_INDEX, Optional.empty());
     }
 
-
-
-    //postdoc method
-    public void postDoc(){
-
+    //delete index method
+    public void deleteIndex() throws IOException {
+        restRequest(SdkHttpMethod.DELETE,ELASTIC_SEARCH_HOST,ELASTIC_SEARCH_INDEX, Optional.empty());
     }
 
 
+
+    //postdoc method
+    public void postDoc(JSObject jGoodies){
+        String postHost = ELASTIC_SEARCH_HOST + "/_doc/";
+
+        restRequest(SdkHttpMethod.POST,ELASTIC_SEARCH_HOST,postHost,);
+    }
 
 
 }

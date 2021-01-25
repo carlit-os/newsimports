@@ -38,7 +38,7 @@ public class AwsSignedRestRequest implements Closeable {
 
         @param path should not have a leading "/" */
     protected HttpExecuteResponse restRequest(SdkHttpMethod method, String host, String path,
-                                              Optional<Map<String, String>> queryParameters)
+                                                     Optional<Map<String, String>> queryParameters)
             throws IOException {
         return restRequest(method, host, path, queryParameters, Optional.empty());
     }
@@ -79,4 +79,3 @@ public class AwsSignedRestRequest implements Closeable {
         httpClient.close();
     }
 }
-

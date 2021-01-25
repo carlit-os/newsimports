@@ -25,6 +25,7 @@ public class App {
     private static final String AWS_SECRET_ACCESS_KEY = System.getenv("AWS_SECRET_ACCESS_KEY");
     private static final String ELASTIC_SEARCH_HOST = System.getenv("ELASTIC_SEARCH_HOST");
     private static String COMMON_CRAWL_FILENAME = System.getenv("COMMON_CRAWL_FILENAME");
+    private static final String ELASTIC_SEARCH_INDEX = System.getenv("ELASTIC_SEARCH_INDEX");
 
 
 
@@ -73,8 +74,11 @@ public class App {
         ArchiveReader library = WARCReaderFactory.get(warcHolder);
 
         //create index
-        ElasticSearch es = new ElasticSearch("es"); //pair with es.close();
-        es.createIndex();
+        ElasticSearch es = new ElasticSearch("es"); //pair with es.close(); consider getenv in place
+
+
+
+        es.createIndex(ELASTIC_SEARCH_INDEX);
 
 
 
@@ -83,6 +87,9 @@ public class App {
         try {
             for (ArchiveRecord record : library) {
                 Object wType = record.getHeader().getHeaderValue("WARC-Type"); //if this is response, we jsoup
+
+
+
                 byte[] bArr = new byte[record.available()]; //constructs array to dump read contents
 
 

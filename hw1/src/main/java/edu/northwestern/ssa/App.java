@@ -21,12 +21,15 @@ import java.time.Duration;
 public class App {
     private static final String AWS_ACCESS_KEY_ID = System.getenv("AWS_ACCESS_KEY_ID");
     private static final String AWS_SECRET_ACCESS_KEY = System.getenv("AWS_SECRET_ACCESS_KEY");
+    private static final String ELASTIC_SEARCH_HOST = System.getenv("ELASTIC_SEARCH_HOST");
+    private static final String COMMON_CRAWL_FILENAME = System.getenv("COMMON_CRAWL_FILENAME");
 
     //TODO add sources
     public static void main(String[] args) throws IOException {
         System.out.println("Hello world!");
 
         int pageCount = 0;
+
 
 
         //Create S3CLient object
@@ -39,7 +42,7 @@ public class App {
         //create request object
         GetObjectRequest sRequest = GetObjectRequest.builder()
                 .bucket("commoncrawl")
-                .key("crawl-data/CC-NEWS/2017/02/CC-NEWS-20170202093341-00045.warc.gz")
+                .key(COMMON_CRAWL_FILENAME)
                 .build();
 
         //create file to write to

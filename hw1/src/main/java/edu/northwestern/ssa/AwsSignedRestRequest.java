@@ -31,7 +31,6 @@ public class AwsSignedRestRequest implements Closeable {
                 .signingRegion(Region.US_EAST_2)
                 .build();
     }
-
     /** Note that the HttpExecuteResponse must be consumed, otherwise the connection will
         never be freed and after 50 requests you will get an error saying
         "Timeout waiting for connection from pool".

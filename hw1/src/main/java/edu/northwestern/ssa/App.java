@@ -24,6 +24,9 @@ public class App {
     private static final String ELASTIC_SEARCH_HOST = System.getenv("ELASTIC_SEARCH_HOST");
     private static final String COMMON_CRAWL_FILENAME = System.getenv("COMMON_CRAWL_FILENAME");
 
+
+
+
     //TODO add sources
     public static void main(String[] args) throws IOException {
         System.out.println("Hello world!");
@@ -38,6 +41,11 @@ public class App {
                 .overrideConfiguration(ClientOverrideConfiguration.builder()
                         .apiCallTimeout(Duration.ofMinutes(30)).build())
                 .build();
+
+        //check for latest warc file if needed
+        if (COMMON_CRAWL_FILENAME == null){
+            ;
+        }
 
         //create request object
         GetObjectRequest sRequest = GetObjectRequest.builder()
@@ -58,7 +66,9 @@ public class App {
         //step 2 parsing
         ArchiveReader library = WARCReaderFactory.get(warcHolder);
 
-        //each record is an HTTP response
+        //ElasticSearch es = new ElasticSearch("es"); pair with es.close()
+        //
+        // each record is an HTTP response
         for(ArchiveRecord record: library){
             Object wType = record.getHeader().getHeaderValue("WARC-Type"); //if this is response, we jsoup
             byte[] bArr = new byte[record.available()]; //constructs array to dump read contents

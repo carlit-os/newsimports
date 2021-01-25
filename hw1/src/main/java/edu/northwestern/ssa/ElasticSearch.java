@@ -40,16 +40,27 @@ public class ElasticSearch extends AwsSignedRestRequest {
 
 
     //postdoc method
-    public void postDoc(JSONObject jGoodies) throws IOException {
+    public void postDoc(JSONObject jGoodies) throws IOException, InterruptedException {
         String postIdx = ELASTIC_SEARCH_INDEX + "/_doc/";
 
         Optional<JSONObject> oPjGoodies= Optional.of(jGoodies);
 
-        HttpExecuteResponse postit = this.restRequest(SdkHttpMethod.POST,ELASTIC_SEARCH_HOST,postIdx,Optional.empty(),oPjGoodies);
 
-        postit.responseBody().get().close();
+        while(true) {
+            try {
+
+                HttpExecuteResponse postit = this.restRequest(SdkHttpMethod.POST, ELASTIC_SEARCH_HOST, postIdx, Optional.empty(), oPjGoodies);
+                //Thread.sleep(1000); //requesting too fast?? #112
+                postit.responseBody().get().close();
+                break;
+            }
+            catch (Exception ignored) {
+            }
+        }
+
 
         //TODO:handle queryparams for minnesota twins #229
+        //TODO: specify document ID to avoid duplicate docs
     }
 
 

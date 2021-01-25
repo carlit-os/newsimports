@@ -30,7 +30,7 @@ public class App {
 
 
     //TODO add sources
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         System.out.println("Hello world!");
 
         int pageCount = 0;
@@ -62,8 +62,8 @@ public class App {
 
         sClient.getObject(sRequest, ResponseTransformer.toFile(warcHolder));
 
-        //s requests have concluded
-        sClient.close();
+
+
         //-------------------------------------------------------------------------------------------------------------
         //-------------------------------------------------------------------------------------------------------------
 
@@ -160,9 +160,9 @@ public class App {
 
             System.out.println("This many responses:" + pageCount);
             //end of parse
+            sClient.close();
             es.deleteIndex();
             es.close();
-
 
             warcHolder.delete();
         } catch (IOException e) {
@@ -170,8 +170,10 @@ public class App {
         } catch (JSONException e) {
             e.printStackTrace();
         } finally {
+            sClient.close();
             es.deleteIndex();
             es.close();
+
             warcHolder.delete();
         }
 

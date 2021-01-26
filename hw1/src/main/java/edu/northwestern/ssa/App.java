@@ -195,7 +195,7 @@ public class App {
             e.printStackTrace();
         } finally {
             sClient.close();
-            es.deleteIndex();
+            //es.deleteIndex();
             es.close();
 
             warcHolder.delete();

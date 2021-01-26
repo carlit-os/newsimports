@@ -41,10 +41,11 @@ public class App {
 
         //Create S3CLient object
         S3Client sClient = S3Client.builder()
-                .region(Region.US_EAST_2)
+                .region(Region.US_EAST_1)
                 .overrideConfiguration(ClientOverrideConfiguration.builder()
                         .apiCallTimeout(Duration.ofMinutes(30)).build())
                 .build();
+
 
         //check for latest warc file if needed
         //if (COMMON_CRAWL_FILENAME == null){
@@ -184,7 +185,7 @@ public class App {
             System.out.println("This many responses:" + pageCount);
             //end of parse
             sClient.close();
-            es.deleteIndex();
+            //es.deleteIndex();  //remove when submitting
             es.close();
 
             warcHolder.delete();

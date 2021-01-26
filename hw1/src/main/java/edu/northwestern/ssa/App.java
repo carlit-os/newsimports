@@ -4,7 +4,7 @@ package edu.northwestern.ssa;
 import org.archive.io.ArchiveReader;
 import org.archive.io.ArchiveRecord;
 import org.archive.io.warc.WARCReaderFactory;
-import org.jets3t.service.S3Service;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -59,14 +59,13 @@ public class App {
             ListObjectsV2Request request = ListObjectsV2Request.builder()
                     .bucket("commoncrawl")
                     .prefix("crawl-data/CC-NEWS/${year}/${month}")
+                    //%04d %02d
                     .build();
 
             ListObjectsV2Response result = sClient.listObjectsV2(request);
 
             List<S3Object> holder = result.contents().stream().sorted(Comparator.comparing(object->object.key())).collect(Collectors.toList());
 
-
-            //Optional<S3Object> last = holder.reduce((first, second) -> second);
 
             COMMON_CRAWL_FILENAME = holder.get(holder.size()-1).key();
 
@@ -87,7 +86,7 @@ public class App {
         File warcHolder = new File("initialWARC.warc");
 
 
-        sClient.getObject(sRequest, ResponseTransformer.toFile(warcHolder));
+        sClient.getObject(sRequest, ResponseTransformer.toFile(warcHolder)); //consider streaming here instead of downloading
 
 
 
@@ -97,7 +96,7 @@ public class App {
 
 
         //step 2 parsing
-        ArchiveReader library = WARCReaderFactory.get(warcHolder);
+        ArchiveReader library = WARCReaderFactory.get(warcHolder); //pass inputstream of warcholder here
 
         //create index
         ElasticSearch es = new ElasticSearch("es"); //pair with es.close(); consider getenv in place
@@ -215,7 +214,7 @@ public class App {
             System.out.println("This many responses:" + pageCount);
             //end of parse
             sClient.close();
-            es.deleteIndex();  //remove when submitting
+            //es.deleteIndex();  //remove when submitting
             es.close();
 
             warcHolder.delete();

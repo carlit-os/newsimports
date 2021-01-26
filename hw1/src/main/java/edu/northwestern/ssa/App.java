@@ -41,15 +41,15 @@ public class App {
 
         //Create S3CLient object
         S3Client sClient = S3Client.builder()
-                .region(Region.US_EAST_1)
+                .region(Region.US_EAST_2)
                 .overrideConfiguration(ClientOverrideConfiguration.builder()
                         .apiCallTimeout(Duration.ofMinutes(30)).build())
                 .build();
 
         //check for latest warc file if needed
-        if (COMMON_CRAWL_FILENAME == null){
-            ;
-        }
+        //if (COMMON_CRAWL_FILENAME == null){
+        //    ;
+        //}
 
         //create request object
         GetObjectRequest sRequest = GetObjectRequest.builder()
@@ -77,7 +77,6 @@ public class App {
         ElasticSearch es = new ElasticSearch("es"); //pair with es.close(); consider getenv in place
 
 
-
         es.createIndex(ELASTIC_SEARCH_INDEX);
 
 
@@ -86,13 +85,23 @@ public class App {
         // each record is an HTTP response
         try {
             for (ArchiveRecord record : library) {
-                Object wType = record.getHeader().getHeaderValue("WARC-Type"); //if this is response, we jsoup
+                Object wType = record.getHeader().getHeaderValue("WARC-Type"); //if this is response, we build strings + jsoup
 
+                String siteInfo = "";
 
+                if (wType.equals("response")) {
+                    int offset = 0;
+                    int scratch = 0;
+                    byte[] bArr = new byte[record.available()]; //constructs array to dump read contents
 
-                byte[] bArr = new byte[record.available()]; //constructs array to dump read contents
-
-
+                    while  (scratch > -1) {
+                        try{
+                            scratch = record.read(bArr, offset, bArr.length);
+                            offset += scratch;
+                        }catch (IOException e){
+                            e.printStackTrace();
+                        }
+                    }
                 // String rawStr = bArr.toString();
 
 
@@ -101,47 +110,54 @@ public class App {
 
                 //InputStream inputStream = new ByteArrayInputStream(rawStr.getBytes());
 
-                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                record.dump(buffer);
+                //ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                //record.dump(buffer);
 
-            /* remove if dumping works
-            int nRead;
-            byte[] data = new byte[1024]; //try using bArr in place
+                /* remove if dumping works
+                int nRead;
+                byte[] data = new byte[1024]; //try using bArr in place
 
-            while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
-                buffer.write(data, 0, nRead);
-            }
-            */
+                while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+                    buffer.write(data, 0, nRead);
+                }
+                */
 
-                buffer.flush();
-                byte[] byteArray = buffer.toByteArray();
+                //buffer.flush();
+                //byte[] byteArray = buffer.toByteArray();
 
-                String text = new String(byteArray, StandardCharsets.UTF_8);
+                    String text = new String(bArr, StandardCharsets.UTF_8);
+
+                    siteInfo = siteInfo + text;
 
                 //assertThat(text, equalTo(originalString)); looks like a unit test
                 //https://www.baeldung.com/convert-input-stream-to-string
                 //start from https://www.programcreek.com/java-api-examples/?api=org.archive.io.warc.WARCReaderFactory
                 //original function
 
-            /*
-            //while (record.available() != 0) {
-            record.read(bArr); //read HTTP response record
-            //}
+                /*
+                //while (record.available() != 0) {
+                record.read(bArr); //read HTTP response record
+                //}
 
-            //bArr now has the contents of the record dumped in
-            //convert bArr to string
-            // byte[] to string https://mkyong.com/java/how-do-convert-byte-array-to-string-in-java/
+                //bArr now has the contents of the record dumped in
+                //convert bArr to string
+                // byte[] to string https://mkyong.com/java/how-do-convert-byte-array-to-string-in-java/
 
-            String transRecord = new String(bArr, StandardCharsets.UTF_8);
+                String transRecord = new String(bArr, StandardCharsets.UTF_8);
 
-             */
+                 */
 
                 //goodies
 
 
                 ////////////////step 3 jsoup + call to post
-                if (wType.equals("response")) {
-                    String htmlRaw = text.substring(text.indexOf("\r\n\r\n") + 4);
+
+
+
+
+
+
+                    String htmlRaw = siteInfo.substring(text.indexOf("\r\n\r\n") + 4);
                     Document htmlDoc = Jsoup.parse(htmlRaw);
                     String url = record.getHeader().getUrl();
                     String title = htmlDoc.title();

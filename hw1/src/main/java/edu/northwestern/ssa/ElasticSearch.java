@@ -34,7 +34,7 @@ public class ElasticSearch extends AwsSignedRestRequest {
     public void createIndex(String index) throws IOException {
         HttpExecuteResponse table = this.restRequest(SdkHttpMethod.PUT,ELASTIC_SEARCH_HOST,index, java.util.Optional.empty());
 
-        table.responseBody().get().close(); //do I need to close this when I create an index or just when postng??
+        table.responseBody().get().close(); //do I need to close this when I create an index or just when posting??
     }
 
     //delete index method
@@ -58,9 +58,10 @@ public class ElasticSearch extends AwsSignedRestRequest {
 
                 HttpExecuteResponse postit = this.restRequest(SdkHttpMethod.POST, ELASTIC_SEARCH_HOST, postIdx, java.util.Optional.empty(), oPjGoodies);
                 Thread.sleep(50); //requesting too fast?? #112
-                System.out.println("Posting status code" + postit.httpResponse().statusCode());
                 postit.responseBody().get().close();
-                break;
+                System.out.println("Posting status code" + postit.httpResponse().statusCode());
+
+                //break;
             }
             catch (Exception ignored) {
             }

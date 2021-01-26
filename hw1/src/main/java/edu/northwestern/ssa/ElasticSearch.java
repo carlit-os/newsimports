@@ -1,10 +1,7 @@
 package edu.northwestern.ssa;
 
-import com.sun.tools.javac.tree.JCTree;
-import netscape.javascript.JSObject;
-import org.json.HTTP;
+
 import org.json.JSONObject;
-import software.amazon.awssdk.http.HttpExecuteRequest;
 import software.amazon.awssdk.http.HttpExecuteResponse;
 import software.amazon.awssdk.http.SdkHttpMethod;
 
@@ -15,17 +12,17 @@ import java.util.Optional;
 public class ElasticSearch extends AwsSignedRestRequest {
     private static final String ELASTIC_SEARCH_HOST = System.getenv("ELASTIC_SEARCH_HOST");
     private static final String ELASTIC_SEARCH_INDEX = System.getenv("ELASTIC_SEARCH_INDEX");
-    private final String serviceName;
+    //private final String serviceName;
 
 
     /**
      * @param serviceName would be "es" for Elasticsearch
      */
     ElasticSearch(String serviceName) {
-
         super(serviceName);
-        this.serviceName=serviceName;
+        //call the extended init and create all variables
 
+        //this.serviceName=serviceName;
 
     }
 
@@ -52,20 +49,23 @@ public class ElasticSearch extends AwsSignedRestRequest {
 
         Optional<JSONObject> oPjGoodies= Optional.of(jGoodies);
 
+        this.restRequest(SdkHttpMethod.POST, ELASTIC_SEARCH_HOST, postIdx, java.util.Optional.empty(), oPjGoodies).responseBody().get().close();
+        Thread.sleep(50); //requesting too fast?? #112
 
-        while(true) {
-            try {
 
-                HttpExecuteResponse postit = this.restRequest(SdkHttpMethod.POST, ELASTIC_SEARCH_HOST, postIdx, java.util.Optional.empty(), oPjGoodies);
-                Thread.sleep(50); //requesting too fast?? #112
-                postit.responseBody().get().close();
-                System.out.println("Posting status code" + postit.httpResponse().statusCode());
+        //postit.responseBody().get().close();
+        //System.out.println("Posting status code" + postit.httpResponse().statusCode());
+
+        //while(true) {
+           // try {
+
+
 
                 //break;
-            }
-            catch (Exception ignored) {
-            }
-        }
+            //}
+            //catch (Exception ignored) {
+            //}
+        //}
 
 
         //TODO:handle queryparams for minnesota twins #229

@@ -4,6 +4,7 @@ package edu.northwestern.ssa;
 import org.archive.io.ArchiveReader;
 import org.archive.io.ArchiveRecord;
 import org.archive.io.warc.WARCReaderFactory;
+import org.jets3t.service.S3Service;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -12,12 +13,17 @@ import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.services.s3.model.*;
+
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class App {
@@ -29,9 +35,8 @@ public class App {
 
 
 
-
     //TODO add sources
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static <S3ObjectSummary> void main(String[] args) throws IOException, InterruptedException {
         System.out.println("Hello world!");
 
         int pageCount = 0;
@@ -48,15 +53,35 @@ public class App {
 
 
         //check for latest warc file if needed
-        //if (COMMON_CRAWL_FILENAME == null){
-        //    ;
-        //}
+        if (COMMON_CRAWL_FILENAME == null){
+
+
+            ListObjectsV2Request request = ListObjectsV2Request.builder()
+                    .bucket("commoncrawl")
+                    .prefix("crawl-data/CC-NEWS/${year}/${month}")
+                    .build();
+
+            ListObjectsV2Response result = sClient.listObjectsV2(request);
+
+            List<S3Object> holder = result.contents().stream().sorted(Comparator.comparing(object->object.key())).collect(Collectors.toList());
+
+
+            //Optional<S3Object> last = holder.reduce((first, second) -> second);
+
+            COMMON_CRAWL_FILENAME = holder.get(holder.size()-1).key();
+
+            //https://stackoverflow.com/questions/21426843/get-last-element-of-stream-list-in-a-one-liner
+        }
 
         //create request object
         GetObjectRequest sRequest = GetObjectRequest.builder()
                 .bucket("commoncrawl")
                 .key(COMMON_CRAWL_FILENAME)
                 .build();
+
+
+
+
 
         //create file to write to
         File warcHolder = new File("initialWARC.warc");
@@ -156,7 +181,7 @@ public class App {
 
 
 
-
+                    siteInfo.replace("\0", "");
 
                     String htmlRaw = siteInfo.substring(text.indexOf("\r\n\r\n") + 4);
                     Document htmlDoc = Jsoup.parse(htmlRaw);
@@ -174,7 +199,12 @@ public class App {
                     goodies.put("title", title);
                     goodies.put("url", url);
                     //post
-                    es.postDoc(goodies);
+
+                    try {
+                        es.postDoc(goodies);
+                    }catch (IOException e){
+                        System.out.println("posting mistake");
+                    }
 
 
                 }
@@ -185,7 +215,7 @@ public class App {
             System.out.println("This many responses:" + pageCount);
             //end of parse
             sClient.close();
-            //es.deleteIndex();  //remove when submitting
+            es.deleteIndex();  //remove when submitting
             es.close();
 
             warcHolder.delete();

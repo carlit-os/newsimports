@@ -5,7 +5,6 @@ import org.archive.io.ArchiveReader;
 import org.archive.io.ArchiveRecord;
 import org.archive.io.warc.WARCReaderFactory;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -17,10 +16,15 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
 
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.Collections;
+import java.util.List;
 
 
 
@@ -49,34 +53,87 @@ public class App {
                         .apiCallTimeout(Duration.ofMinutes(30)).build())
                 .build();
 
+        //sClient.close(); //remove when submitting
 
 
         //check for latest warc file if needed
 
 
-        if (COMMON_CRAWL_FILENAME == null || COMMON_CRAWL_FILENAME == ""){
+        if (COMMON_CRAWL_FILENAME == null || COMMON_CRAWL_FILENAME.equals("")){
+
+            LocalDate today = LocalDate.now();
+
+            Month monthObj = today.getMonth();
+
+            int monthNum = monthObj.getValue();
+
+            String strToday = today.toString();
+
+            String curMonth = strToday.substring(5,7);
+
+            String curDay = strToday.substring(8,10);
+
+            String curYear = strToday.substring(0,4);
+
+            /*
+            if (curDay.equals("01")){
+                if (curMonth.equals("01")){
+                    curMonth = "12";
+                }
+
+
+            }*/
+
 
 
             ListObjectsV2Request request = ListObjectsV2Request.builder()
                     .bucket("commoncrawl")
-                    .prefix("crawl-data/CC-NEWS/${year}/${month}")
-                    //%04d %02d
+                    .prefix("crawl-data/CC-NEWS/"+curYear+"/"+curMonth)
                     .build();
 
-            ListObjectsV2Response result = sClient.listObjectsV2(request);
+
+            ListObjectsV2Response response = sClient.listObjectsV2(request);
+
+
+            List<S3Object> holder = response.contents();
+
+            
+            // create a string made up of n copies of string s
+            String largeKey = String.join("", Collections.nCopies(49, "z"));
+
+
+            //int trade = 0 //delete when sub
+
+            for (S3Object obj : holder){
+                String trimKey = obj.key().substring(0,49);
+                String trimLarge = largeKey.substring(0,49);
+
+                if(trimKey.compareTo(trimLarge) < 0){
+                    System.out.println("took "+obj.key()+" handed off " + largeKey);
+                    largeKey = obj.key();
+                }else {
+                    System.out.println("kept "+ largeKey+" disregarded " + obj.key());
+                }
+
+
+            }
 
             //contents returns gives back list of objects
 
             //List<S3Object> holder = result.contents();
 
-            //stream().sorted(Comparator.comparing(S3Object::key)).collect(Collectors.toList());
 
             /*
-            for(S3Object obj : holder){
-                obj.lastModified();
-                obj.key();
+            for(ListObjectsV2Response page : response) {
+                page.contents().forEach((S3Object obj) -> {
+                    System.out.println(obj.key());
+                });
+
+                //obj.lastModified();
+                //obj.key();
 
             }*/
+
 
             //COMMON_CRAWL_FILENAME = holder.get(holder.size()-1).key();
 
@@ -98,20 +155,6 @@ public class App {
 
 
 
-        //create file to write to
-        //File warcHolder = new File("initialWARC.warc");
-
-        //FileInputStream fis = new FileInputStream(warcHolder);
-
-        //ResponseTransformer.toFile(warcHolder)
-
-        //FileInputStream fis = sClient.getObject(sRequest, ResponseTransformer.toInputStream()); //consider streaming here instead of downloading
-
-        //InputStream fis = ;
-
-
-
-
         //step 2 parsing
         ArchiveReader library = WARCReaderFactory.get(COMMON_CRAWL_FILENAME, sClient.getObject(sRequest), true); //pass inputstream of warcholder here
 
@@ -123,9 +166,9 @@ public class App {
 
         es.createIndex(ELASTIC_SEARCH_INDEX, ELASTIC_SEARCH_HOST);
 
-        //es.deleteIndex(ELASTIC_SEARCH_HOST,ELASTIC_SEARCH_INDEX); //remove when submitting
-        //es.close(); // remove when submitting
-        //sClient.close(); //remove when submitting
+        es.deleteIndex(ELASTIC_SEARCH_HOST,ELASTIC_SEARCH_INDEX); //remove when submitting
+        es.close(); // remove when submitting
+        sClient.close(); //remove when submitting
 
         //
         // each record is an HTTP response
@@ -224,6 +267,8 @@ public class App {
 
 
 }
+
+//COMMON_CRAWL_FILENAME=crawl-data/CC-NEWS/2017/02/CC-NEWS-20170202093341-00045.warc.gz tiny warc file
 //https://www.baeldung.com/convert-input-stream-to-string
 //start from https://www.programcreek.com/java-api-examples/?api=org.archive.io.warc.WARCReaderFactory
 //original function
@@ -239,4 +284,5 @@ public class App {
 
                 String transRecord = new String(bArr, StandardCharsets.UTF_8);
 
+https://stackoverflow.com/questions/8027265/how-to-list-all-aws-s3-objects-in-a-bucket-using-java
                  */

@@ -10,8 +10,7 @@ import java.util.Optional;
 
 
 public class ElasticSearch extends AwsSignedRestRequest {
-    private static final String ELASTIC_SEARCH_HOST = System.getenv("ELASTIC_SEARCH_HOST");
-    private static final String ELASTIC_SEARCH_INDEX = System.getenv("ELASTIC_SEARCH_INDEX");
+
     //private final String serviceName;
 
 
@@ -20,23 +19,22 @@ public class ElasticSearch extends AwsSignedRestRequest {
      */
     ElasticSearch(String serviceName) {
         super(serviceName);
-        //call the extended init and create all variables
 
-        //this.serviceName=serviceName;
+        //this.serviceName=serviceName; is this needed ??
 
     }
 
 
     //create index method
-    public void createIndex(String index) throws IOException {
-        HttpExecuteResponse table = this.restRequest(SdkHttpMethod.PUT,ELASTIC_SEARCH_HOST,index, java.util.Optional.empty());
+    public void createIndex(String index, String host) throws IOException {
+        HttpExecuteResponse table = this.restRequest(SdkHttpMethod.PUT,host,index, java.util.Optional.empty());
 
         table.responseBody().get().close(); //do I need to close this when I create an index or just when posting??
     }
 
     //delete index method
-    public void deleteIndex() throws IOException {
-        HttpExecuteResponse erase = this.restRequest(SdkHttpMethod.DELETE,ELASTIC_SEARCH_HOST,ELASTIC_SEARCH_INDEX, java.util.Optional.empty());
+    public void deleteIndex(String host,String index) throws IOException {
+        HttpExecuteResponse erase = this.restRequest(SdkHttpMethod.DELETE,host,index, java.util.Optional.empty());
 
         erase.responseBody().get().close(); // is this necessary?
     }
@@ -44,15 +42,19 @@ public class ElasticSearch extends AwsSignedRestRequest {
 
 
     //postdoc method
-    public void postDoc(JSONObject jGoodies) throws IOException, InterruptedException {
-        String postIdx = ELASTIC_SEARCH_INDEX + "/_doc/";
+    public void postDoc(JSONObject jGoodies, String index, String host) throws IOException, InterruptedException { //consider returning the while loop for evanston
+        String postIdx = index + "/_doc/";
 
         Optional<JSONObject> oPjGoodies= Optional.of(jGoodies);
 
-        this.restRequest(SdkHttpMethod.POST, ELASTIC_SEARCH_HOST, postIdx, java.util.Optional.empty(), oPjGoodies).responseBody().get().close();
+        HttpExecuteResponse postit = this.restRequest(SdkHttpMethod.POST, host, postIdx, java.util.Optional.empty(), oPjGoodies);
+
+       // System.out.println("Posting status code" + postit.httpResponse().statusCode());
+        postit.responseBody().get().close();
         Thread.sleep(50); //requesting too fast?? #112
 
 
+        //this.restRequest(SdkHttpMethod.POST, host , postIdx, java.util.Optional.empty(), oPjGoodies).responseBody().get().close(); condensed!!
         //postit.responseBody().get().close();
         //System.out.println("Posting status code" + postit.httpResponse().statusCode());
 

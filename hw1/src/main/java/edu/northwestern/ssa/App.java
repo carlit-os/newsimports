@@ -9,8 +9,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
-import software.amazon.awssdk.core.sync.ResponseTransformer;
+
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
@@ -21,9 +22,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
+
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 
 
 public class App {
@@ -66,7 +67,6 @@ public class App {
 
             List<S3Object> holder = result.contents().stream().sorted(Comparator.comparing(object->object.key())).collect(Collectors.toList());
 
-
             COMMON_CRAWL_FILENAME = holder.get(holder.size()-1).key();
 
             //https://stackoverflow.com/questions/21426843/get-last-element-of-stream-list-in-a-one-liner
@@ -83,27 +83,31 @@ public class App {
 
 
         //create file to write to
-        File warcHolder = new File("initialWARC.warc");
+        //File warcHolder = new File("initialWARC.warc");
 
+        //FileInputStream fis = new FileInputStream(warcHolder);
 
-        sClient.getObject(sRequest, ResponseTransformer.toFile(warcHolder)); //consider streaming here instead of downloading
+        //ResponseTransformer.toFile(warcHolder)
 
+        //FileInputStream fis = sClient.getObject(sRequest, ResponseTransformer.toInputStream()); //consider streaming here instead of downloading
 
+        //InputStream fis = ;
 
-        //-------------------------------------------------------------------------------------------------------------
-        //-------------------------------------------------------------------------------------------------------------
 
 
 
         //step 2 parsing
-        ArchiveReader library = WARCReaderFactory.get(warcHolder); //pass inputstream of warcholder here
+        ArchiveReader library = WARCReaderFactory.get(COMMON_CRAWL_FILENAME, sClient.getObject(sRequest), true); //pass inputstream of warcholder here
+
+
 
         //create index
         ElasticSearch es = new ElasticSearch("es"); //pair with es.close(); consider getenv in place
 
 
-        es.createIndex(ELASTIC_SEARCH_INDEX);
+        es.createIndex(ELASTIC_SEARCH_INDEX, ELASTIC_SEARCH_HOST);
 
+        //es.deleteIndex(ELASTIC_SEARCH_HOST,ELASTIC_SEARCH_INDEX); //remove when submitting
 
 
         //
@@ -121,43 +125,90 @@ public class App {
 
                     while  (scratch > -1) {
                         try{
-                            scratch = record.read(bArr, offset, bArr.length);
+                            scratch = record.read(bArr, offset, Math.min(2048,record.available())); //give me at the least 2KB
                             offset += scratch;
                         }catch (IOException e){
                             e.printStackTrace();
                         }
                     }
-                // String rawStr = bArr.toString();
 
-
-                //String rawStr = new String(bArr, StandardCharsets.UTF_8); //consider experimenting with charsets on string declr and inputstream declr
-                //InputStream tempStream = new ByteArrayInputStream(record);
-
-                //InputStream inputStream = new ByteArrayInputStream(rawStr.getBytes());
-
-                //ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                //record.dump(buffer);
-
-                /* remove if dumping works
-                int nRead;
-                byte[] data = new byte[1024]; //try using bArr in place
-
-                while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
-                    buffer.write(data, 0, nRead);
-                }
-                */
-
-                //buffer.flush();
-                //byte[] byteArray = buffer.toByteArray();
 
                     String text = new String(bArr, StandardCharsets.UTF_8);
 
                     siteInfo = siteInfo + text;
 
-                //assertThat(text, equalTo(originalString)); looks like a unit test
-                //https://www.baeldung.com/convert-input-stream-to-string
-                //start from https://www.programcreek.com/java-api-examples/?api=org.archive.io.warc.WARCReaderFactory
-                //original function
+                    siteInfo.replace("\0", "");
+
+                    String htmlRaw = siteInfo.substring(text.indexOf("\r\n\r\n") + 4);
+
+                    Document htmlDoc = null;
+
+                    try { //input is binary and unsupported
+                        htmlDoc = Jsoup.parse(htmlRaw);
+                        String url = record.getHeader().getUrl();
+                        String title = htmlDoc.title();
+                        String plainText = htmlDoc.text();
+
+                        pageCount += 1;
+
+                        //JSON construction https://www.tutorialspoint.com/json/json_java_example.htm
+
+                        JSONObject goodies = new JSONObject();
+
+                        goodies.put("txt", plainText);
+                        goodies.put("title", title);
+                        goodies.put("url", url);
+                        //post
+
+                        try {
+                            es.postDoc(goodies, ELASTIC_SEARCH_INDEX, ELASTIC_SEARCH_HOST);
+                        }catch (IOException e){
+                            System.out.println("posting mistake");
+                        }
+
+
+                    }
+                    catch (UncheckedIOException e){
+                        e.printStackTrace();
+                    }
+
+
+
+
+
+                }
+
+
+            }
+
+            System.out.println("This many responses:" + pageCount);
+            //end of parse
+
+            //es.deleteIndex();  //remove when submitting
+            //es.close();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        //es.deleteIndex(ELASTIC_SEARCH_HOST,ELASTIC_SEARCH_INDEX); //remove when submitting
+        es.close();
+        sClient.close();
+
+    }
+
+
+
+
+
+
+
+
+
+}
+//https://www.baeldung.com/convert-input-stream-to-string
+//start from https://www.programcreek.com/java-api-examples/?api=org.archive.io.warc.WARCReaderFactory
+//original function
 
                 /*
                 //while (record.available() != 0) {
@@ -171,73 +222,3 @@ public class App {
                 String transRecord = new String(bArr, StandardCharsets.UTF_8);
 
                  */
-
-                //goodies
-
-
-                ////////////////step 3 jsoup + call to post
-
-
-
-
-                    siteInfo.replace("\0", "");
-
-                    String htmlRaw = siteInfo.substring(text.indexOf("\r\n\r\n") + 4);
-                    Document htmlDoc = Jsoup.parse(htmlRaw);
-                    String url = record.getHeader().getUrl();
-                    String title = htmlDoc.title();
-                    String plainText = htmlDoc.text();
-
-                    pageCount += 1;
-
-                    //JSON construction https://www.tutorialspoint.com/json/json_java_example.htm
-
-                    JSONObject goodies = new JSONObject();
-
-                    goodies.put("txt", plainText);
-                    goodies.put("title", title);
-                    goodies.put("url", url);
-                    //post
-
-                    try {
-                        es.postDoc(goodies);
-                    }catch (IOException e){
-                        System.out.println("posting mistake");
-                    }
-
-
-                }
-
-
-            }
-
-            System.out.println("This many responses:" + pageCount);
-            //end of parse
-            sClient.close();
-            //es.deleteIndex();  //remove when submitting
-            es.close();
-
-            warcHolder.delete();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } finally {
-            sClient.close();
-            //es.deleteIndex();
-            es.close();
-
-            warcHolder.delete();
-        }
-
-    }
-
-
-
-
-
-
-
-
-
-}

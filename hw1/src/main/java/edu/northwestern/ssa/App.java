@@ -20,15 +20,12 @@ import software.amazon.awssdk.services.s3.model.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Comparator;
-import java.util.List;
 
-import java.util.stream.Collectors;
 
 
 
 public class App {
-    private static final String AWS_ACCESS_KEY_ID = System.getenv("AWS_ACCESS_KEY_ID");
+    private static final String AWS_ACCESS_KEY_ID = System.getenv("AWS_ACCESS_KEY_ID"); //why aren't these used
     private static final String AWS_SECRET_ACCESS_KEY = System.getenv("AWS_SECRET_ACCESS_KEY");
     private static final String ELASTIC_SEARCH_HOST = System.getenv("ELASTIC_SEARCH_HOST");
     private static String COMMON_CRAWL_FILENAME = System.getenv("COMMON_CRAWL_FILENAME");
@@ -53,8 +50,11 @@ public class App {
                 .build();
 
 
+
         //check for latest warc file if needed
-        if (COMMON_CRAWL_FILENAME == null){
+
+
+        if (COMMON_CRAWL_FILENAME == null || COMMON_CRAWL_FILENAME == ""){
 
 
             ListObjectsV2Request request = ListObjectsV2Request.builder()
@@ -65,12 +65,28 @@ public class App {
 
             ListObjectsV2Response result = sClient.listObjectsV2(request);
 
-            List<S3Object> holder = result.contents().stream().sorted(Comparator.comparing(object->object.key())).collect(Collectors.toList());
+            //contents returns gives back list of objects
 
-            COMMON_CRAWL_FILENAME = holder.get(holder.size()-1).key();
+            //List<S3Object> holder = result.contents();
+
+            //stream().sorted(Comparator.comparing(S3Object::key)).collect(Collectors.toList());
+
+            /*
+            for(S3Object obj : holder){
+                obj.lastModified();
+                obj.key();
+
+            }*/
+
+            //COMMON_CRAWL_FILENAME = holder.get(holder.size()-1).key();
+
+
+
+            COMMON_CRAWL_FILENAME = "crawl-data/CC-NEWS/2017/02/CC-NEWS-20170202093341-00045.warc.gz";
 
             //https://stackoverflow.com/questions/21426843/get-last-element-of-stream-list-in-a-one-liner
         }
+
 
         //create request object
         GetObjectRequest sRequest = GetObjectRequest.builder()
@@ -108,7 +124,8 @@ public class App {
         es.createIndex(ELASTIC_SEARCH_INDEX, ELASTIC_SEARCH_HOST);
 
         //es.deleteIndex(ELASTIC_SEARCH_HOST,ELASTIC_SEARCH_INDEX); //remove when submitting
-
+        //es.close(); // remove when submitting
+        //sClient.close(); //remove when submitting
 
         //
         // each record is an HTTP response
@@ -125,9 +142,9 @@ public class App {
 
                     while  (scratch > -1) {
                         try{
-                            scratch = record.read(bArr, offset, Math.min(2048,record.available())); //give me at the least 2KB
+                            scratch = record.read(bArr, offset, Math.min(1024,record.available())); //give me at the least 2KB
                             offset += scratch;
-                        }catch (IOException e){
+                        }catch (Exception e){
                             e.printStackTrace();
                         }
                     }
@@ -160,15 +177,16 @@ public class App {
                         goodies.put("url", url);
                         //post
 
+
                         try {
                             es.postDoc(goodies, ELASTIC_SEARCH_INDEX, ELASTIC_SEARCH_HOST);
-                        }catch (IOException e){
-                            System.out.println("posting mistake");
+                        }catch (Exception e){
+                            System.out.println("posting mistake"); //triggered
                         }
 
 
                     }
-                    catch (UncheckedIOException e){
+                    catch (Exception e){
                         e.printStackTrace();
                     }
 
@@ -187,7 +205,7 @@ public class App {
             //es.deleteIndex();  //remove when submitting
             //es.close();
 
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

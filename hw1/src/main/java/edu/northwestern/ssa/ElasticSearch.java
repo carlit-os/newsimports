@@ -51,7 +51,7 @@ public class ElasticSearch extends AwsSignedRestRequest {
 
        // System.out.println("Posting status code" + postit.httpResponse().statusCode());
         postit.responseBody().get().close();
-        Thread.sleep(50); //requesting too fast?? #112
+        //Thread.sleep(50); //requesting too fast?? #112
 
 
         //this.restRequest(SdkHttpMethod.POST, host , postIdx, java.util.Optional.empty(), oPjGoodies).responseBody().get().close(); condensed!!

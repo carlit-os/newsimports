@@ -135,11 +135,7 @@ public class App {
             }*/
 
 
-            //COMMON_CRAWL_FILENAME = holder.get(holder.size()-1).key();
-
-
-
-            COMMON_CRAWL_FILENAME = "crawl-data/CC-NEWS/2017/02/CC-NEWS-20170202093341-00045.warc.gz";
+            COMMON_CRAWL_FILENAME = largeKey;
 
             //https://stackoverflow.com/questions/21426843/get-last-element-of-stream-list-in-a-one-liner
         }
@@ -166,9 +162,9 @@ public class App {
 
         es.createIndex(ELASTIC_SEARCH_INDEX, ELASTIC_SEARCH_HOST);
 
-        es.deleteIndex(ELASTIC_SEARCH_HOST,ELASTIC_SEARCH_INDEX); //remove when submitting
-        es.close(); // remove when submitting
-        sClient.close(); //remove when submitting
+        //es.deleteIndex(ELASTIC_SEARCH_HOST,ELASTIC_SEARCH_INDEX); //remove when submitting
+        //es.close(); // remove when submitting
+        //sClient.close(); //remove when submitting
 
         //
         // each record is an HTTP response

@@ -84,8 +84,8 @@ public class App {
 
             }*/
 
-
-
+            //https://stackoverflow.com/questions/8027265/how-to-list-all-aws-s3-objects-in-a-bucket-using-java
+            //https://docs.aws.amazon.com/AmazonS3/latest/dev/ListingObjectKeysUsingJava.html
             ListObjectsV2Request request = ListObjectsV2Request.builder()
                     .bucket("commoncrawl")
                     .prefix("crawl-data/CC-NEWS/"+curYear+"/"+curMonth)
@@ -99,20 +99,21 @@ public class App {
 
             
             // create a string made up of n copies of string s
-            String largeKey = String.join("", Collections.nCopies(49, "z"));
+            String largeKey = String.join("", Collections.nCopies(49, "a"));
 
 
             //int trade = 0 //delete when sub
-
+            //TODO add sources
             for (S3Object obj : holder){
                 String trimKey = obj.key().substring(0,49);
                 String trimLarge = largeKey.substring(0,49);
-
-                if(trimKey.compareTo(trimLarge) < 0){
-                    System.out.println("took "+obj.key()+" handed off " + largeKey);
+                //TODO remove printouts
+                //TODO clear indicies
+                if(trimKey.compareTo(trimLarge) > 0){
+                    //System.out.println("took "+obj.key()+" handed off " + largeKey);
                     largeKey = obj.key();
                 }else {
-                    System.out.println("kept "+ largeKey+" disregarded " + obj.key());
+                    //System.out.println("kept "+ largeKey+" disregarded " + obj.key());
                 }
 
 
@@ -148,7 +149,7 @@ public class App {
                 .build();
 
 
-
+        //start from https://www.programcreek.com/java-api-examples/?api=org.archive.io.warc.WARCReaderFactory
 
 
         //step 2 parsing
@@ -178,7 +179,7 @@ public class App {
                     int offset = 0;
                     int scratch = 0;
                     byte[] bArr = new byte[record.available()]; //constructs array to dump read contents
-
+                    //https://www.baeldung.com/convert-input-stream-to-string
                     while  (scratch > -1) {
                         try{
                             scratch = record.read(bArr, offset, Math.min(1024,record.available())); //give me at the least 2KB
@@ -265,20 +266,8 @@ public class App {
 }
 
 //COMMON_CRAWL_FILENAME=crawl-data/CC-NEWS/2017/02/CC-NEWS-20170202093341-00045.warc.gz tiny warc file
-//https://www.baeldung.com/convert-input-stream-to-string
-//start from https://www.programcreek.com/java-api-examples/?api=org.archive.io.warc.WARCReaderFactory
-//original function
 
-                /*
-                //while (record.available() != 0) {
-                record.read(bArr); //read HTTP response record
-                //}
 
-                //bArr now has the contents of the record dumped in
-                //convert bArr to string
-                // byte[] to string https://mkyong.com/java/how-do-convert-byte-array-to-string-in-java/
 
-                String transRecord = new String(bArr, StandardCharsets.UTF_8);
 
-https://stackoverflow.com/questions/8027265/how-to-list-all-aws-s3-objects-in-a-bucket-using-java
-                 */
+

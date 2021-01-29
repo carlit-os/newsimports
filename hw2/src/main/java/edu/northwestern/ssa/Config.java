@@ -1,5 +1,6 @@
 package edu.northwestern.ssa;
 
+
 public class Config {
     /**
      * This is useful for getting parameters that might be defined either in system properties

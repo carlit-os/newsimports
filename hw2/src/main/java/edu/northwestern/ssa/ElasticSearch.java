@@ -18,7 +18,11 @@ public class ElasticSearch extends AwsSignedRestRequest{
         super(serviceName);
     }
 
-    public AbortableInputStream getDoc(String host, String idx, Optional<Map<String,String>> dict) throws IOException {
+
+
+
+
+    public AbortableInputStream getDoc(String h , String idx, Optional<Map<String,String>> dict) throws IOException {
 
         HttpExecuteResponse getit = this.restRequest(SdkHttpMethod.GET,host, idx, dict);
 

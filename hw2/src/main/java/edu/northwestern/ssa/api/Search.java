@@ -30,7 +30,7 @@ public class Search {
 
     /** when testing, this is reachable at http://localhost:8080/api/search?query=hello */
     @GET
-    public Response getMsg(@QueryParam("query") String q, @QueryParam("title") String title, @QueryParam("url") String u, @QueryParam("txt") String txt, @QueryParam("language") String l, @QueryParam("date") String d) throws IOException {
+    public Response getMsg(@QueryParam("query") String q, @QueryParam("title") String title, @QueryParam("url") String u, @QueryParam("txt") String txt, @QueryParam("language") String l, @QueryParam("date") String d, @QueryParam("count") int c ,@QueryParam("other") String o) throws IOException {
         JSONArray results = new JSONArray();
         results.put(q);
 

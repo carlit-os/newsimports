@@ -45,32 +45,13 @@ public class Search {
         ElasticSearch es = new ElasticSearch(Config.getParam("ELASTIC_SEARCH_HOST"));
 
 
-        AbortableInputStream resbody = es.getDoc(Config.getParam("ELASTIC_SEARCH_HOST"),
+        JSONObject jObj = es.getDoc(Config.getParam("ELASTIC_SEARCH_HOST"),
                 Config.getParam("ELASTIC_SEARCH_INDEX") + "/_search/",
                 Optional.of(dict));
 
 
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(resbody));
 
-        StringBuilder sb = new StringBuilder();
-
-        String line = null;
-        try {
-            while ((line = reader.readLine()) != null) {
-                sb.append(line + "\n");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                resbody.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        String siteInfo = sb.toString();
 
         String dumvar = "";
 

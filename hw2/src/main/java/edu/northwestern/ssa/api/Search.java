@@ -34,6 +34,9 @@ public class Search {
     //TODO 400 errors are our fault 500 are Tarzia's fault
     @GET
     public Response getMsg(@QueryParam("query") String q, @QueryParam("language") String l, @QueryParam("date") String d, @QueryParam("count") String c, @QueryParam("offset") String o) throws IOException {
+        int status = 200;
+
+
         JSONArray results = new JSONArray();
         //results.put(q);
 
@@ -50,6 +53,8 @@ public class Search {
 
         if(q != null){
             q = q.replaceAll(" "," AND ");
+        }else{
+            status = 400;
         }
 
 
@@ -164,7 +169,7 @@ public class Search {
 
 
 
-        return Response.status(200).type("application/json").entity(gift.toString(4))
+        return Response.status(status).type("application/json").entity(gift.toString(4))
                 // below header is for CORS
                 .header("Access-Control-Allow-Origin", "*").build();
     }

@@ -19,9 +19,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Path("/search")
 public class Search {
@@ -30,6 +28,9 @@ public class Search {
         //@from is offset
         //@size is count
     /** when testing, this is reachable at http://localhost:8080/api/search?query=hello */
+
+    //TODO lang or language?
+    //TODO 400 errors are our fault 500 are Tarzia's fault
     @GET
     public Response getMsg(@QueryParam("query") String q, @QueryParam("language") String l, @QueryParam("date") String d, @QueryParam("count") String c, @QueryParam("offset") String o) throws IOException {
         JSONArray results = new JSONArray();
@@ -38,13 +39,44 @@ public class Search {
 
         Map<String, String> dict = new HashMap<String, String>();
 
+        //TODO lang is key in dictionary
+
+        ////////-------------------------------------------------------------------------------------------------------
+        ////////--------------------------------------------------------------------------------------------------------
+        //build lucene query
+        List<String> qargs = new ArrayList<String>();
+
+
+        if(q != null){
+            q = q.replaceAll(" "," AND ");
+        }
+
+
+        qargs.add("txt:("+q+")");
+
+
+        if(l != null){
+            qargs.add("lang:"+l);
+        }
+        if(d != null){
+            qargs.add("date:"+d);
+        }
+
+        String lucene = String.join(" AND ", qargs);
+
+        ////////--------------------------------------------------------------------------------------------------------
+        ////////--------------------------------------------------------------------------------------------------------
+
+
+        //put query params into dict
         //parameters are keys
-        dict.put("q","txt:(" + q + ")       "); //surround everything like this
+        dict.put("q",lucene); //surround everything like this
         //key should be lang
 
         dict.put("size",c);
         dict.put("from",o);
 
+        //dict.put("q","txt:(" + q + ")       "); //surround everything like this
         ////////----------------------------------------------------------------------------------
 
 
@@ -77,3 +109,5 @@ public class Search {
 // https://www.baeldung.com/convert-input-stream-to-string
 
 // http://www.java2s.com/Code/Android/File/ToconverttheInputStreamtoStringweusetheBufferedReaderreadLinemethod.htm
+
+///http://localhost:8080/api/search?query=hello+world&language=en&date=2021-01-25&count=1

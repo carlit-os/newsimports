@@ -153,19 +153,18 @@ public class Search {
         gift.put("returned_results",returned_results);
 
 
-        Object samp = grabber.get("total");
+        JSONObject metaTotal = (JSONObject) grabber.get("total");
 
-        String dummu = "";
+        int total = (int) metaTotal.get("value");
 
-        //gift.put("total_results",);
+        gift.put("total_results",total);
+        gift.put("artciles",artList);
+
+        //String dummu = ""; break here to see vars
 
 
 
-
-
-        
-
-        return Response.status(200).type("application/json").entity(results.toString(4))
+        return Response.status(200).type("application/json").entity(gift.toString(4))
                 // below header is for CORS
                 .header("Access-Control-Allow-Origin", "*").build();
     }

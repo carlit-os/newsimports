@@ -4,6 +4,7 @@ import edu.northwestern.ssa.AwsSignedRestRequest;
 import edu.northwestern.ssa.Config;
 import edu.northwestern.ssa.ElasticSearch;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import software.amazon.awssdk.http.AbortableInputStream;
@@ -34,7 +35,7 @@ public class Search {
     @GET
     public Response getMsg(@QueryParam("query") String q, @QueryParam("language") String l, @QueryParam("date") String d, @QueryParam("count") String c, @QueryParam("offset") String o) throws IOException {
         JSONArray results = new JSONArray();
-        results.put(q);
+        //results.put(q);
 
 
         Map<String, String> dict = new HashMap<String, String>();
@@ -79,9 +80,10 @@ public class Search {
             dict.put("from",o);
         }
 
+        dict.put("track_total_hits", "true");  //total results
 
 
-        //dict.put("q","txt:(" + q + ")       "); //surround everything like this
+
         ////////----------------------------------------------------------------------------------
 
 
@@ -93,13 +95,75 @@ public class Search {
                 Config.getParam("ELASTIC_SEARCH_INDEX") + "/_search/",
                 Optional.of(dict));
 
+        JSONObject grabber = (JSONObject) jObj.get("hits");
+
+        JSONArray deepGrabber = (JSONArray) grabber.get("hits"); //basically array of articles
+
+        JSONArray artList = new JSONArray();
+
+        int returned_results=deepGrabber.length();
+
+        for (int i = 0; i < deepGrabber.length(); i++) {
+            JSONObject meta = deepGrabber.getJSONObject(i);
+            JSONObject article = meta.getJSONObject("_source");
+
+
+            String title = (String) article.get("title");
+            String url = (String) article.get("url");
+
+            boolean dateFail = true;
+            String date = null;
+
+            boolean langFail = true;
+            String gLang = null;
+
+            try{
+                date = (String) article.get("date");
+                dateFail = false;
+            }catch (Exception je){
+            }
+
+
+            try{
+                gLang = (String) article.get("lang");
+                langFail = false;
+            }catch (Exception je){
+            }
 
 
 
 
-        String dumvar = ""; //break here to view jObj
+            String txt = (String) article.get("txt");
+
+            JSONObject art = new JSONObject();
+            art.put("title",title);
+            art.put("url",url);
+            art.put("txt",txt);
+            art.put("date",date);
+            art.put("lang",gLang);
+
+            artList.put(art);
+
+        }
+
+        //should have articles: list filled up
+
+        JSONObject gift = new JSONObject();
+
+        gift.put("returned_results",returned_results);
 
 
+        Object samp = grabber.get("total");
+
+        String dummu = "";
+
+        //gift.put("total_results",);
+
+
+
+
+
+        
 
         return Response.status(200).type("application/json").entity(results.toString(4))
                 // below header is for CORS

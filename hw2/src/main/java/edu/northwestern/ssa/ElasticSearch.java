@@ -54,6 +54,8 @@ public class ElasticSearch extends AwsSignedRestRequest{
 
         JSONObject jObj = new JSONObject(siteInfo);
 
+        getit.responseBody().get().close();
+
         return jObj;
     }
 

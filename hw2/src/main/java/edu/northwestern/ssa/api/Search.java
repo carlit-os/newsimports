@@ -70,11 +70,16 @@ public class Search {
 
         //put query params into dict
         //parameters are keys
-        dict.put("q",lucene); //surround everything like this
+        dict.put("q",lucene);
         //key should be lang
+        if(c != null){
+            dict.put("size",c);
+        }
+        if(o != null){
+            dict.put("from",o);
+        }
 
-        dict.put("size",c);
-        dict.put("from",o);
+
 
         //dict.put("q","txt:(" + q + ")       "); //surround everything like this
         ////////----------------------------------------------------------------------------------
@@ -92,7 +97,7 @@ public class Search {
 
 
 
-        String dumvar = "";
+        String dumvar = ""; //break here to view jObj
 
 
 

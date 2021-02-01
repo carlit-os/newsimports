@@ -52,7 +52,7 @@ public class ElasticSearch extends AwsSignedRestRequest{
 
         String siteInfo = sb.toString();
 
-        JSONObject jObj = new JSONObject();
+        JSONObject jObj = new JSONObject(siteInfo);
 
         return jObj;
     }

@@ -27,16 +27,23 @@ import java.util.Optional;
 public class Search {
     //private static final String ELASTIC_SEARCH_HOST = System.getenv("ELASTIC_SEARCH_HOST");
     //private static final String ELASTIC_SEARCH_INDEX = System.getenv("ELASTIC_SEARCH_INDEX");
-
+        //@from is offset
+        //@size is count
     /** when testing, this is reachable at http://localhost:8080/api/search?query=hello */
     @GET
-    public Response getMsg(@QueryParam("query") String q, @QueryParam("title") String title, @QueryParam("url") String u, @QueryParam("txt") String txt, @QueryParam("language") String l, @QueryParam("date") String d, @QueryParam("count") int c ,@QueryParam("other") String o) throws IOException {
+    public Response getMsg(@QueryParam("query") String q, @QueryParam("language") String l, @QueryParam("date") String d, @QueryParam("count") String c, @QueryParam("offset") String o) throws IOException {
         JSONArray results = new JSONArray();
         results.put(q);
 
 
         Map<String, String> dict = new HashMap<String, String>();
-        dict.put("q","txt:northwestern");
+
+        //parameters are keys
+        dict.put("q","txt:(" + q + ")       "); //surround everything like this
+        //key should be lang
+
+        dict.put("size",c);
+        dict.put("from",o);
 
         ////////----------------------------------------------------------------------------------
 

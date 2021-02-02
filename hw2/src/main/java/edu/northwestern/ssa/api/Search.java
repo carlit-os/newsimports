@@ -163,15 +163,20 @@ public class Search {
         int total = (int) metaTotal.get("value");
 
         gift.put("total_results",total);
-        gift.put("artciles",artList);
+        gift.put("articles",artList);
 
         //String dummu = ""; break here to see vars
 
+        if (status==400) {
+            return Response.status(status).type("application/json").entity("'query' is missing from url.")
+                    // below header is for CORS
+                    .header("Access-Control-Allow-Origin", "*").build();
+        }else {
+            return Response.status(status).type("application/json").entity(gift.toString(4))
+                    // below header is for CORS
+                    .header("Access-Control-Allow-Origin", "*").build();
+        }
 
-
-        return Response.status(status).type("application/json").entity(gift.toString(4))
-                // below header is for CORS
-                .header("Access-Control-Allow-Origin", "*").build();
     }
 }
 //sources

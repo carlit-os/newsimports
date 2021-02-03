@@ -53,6 +53,7 @@
         .catch(() => this.setState({searchResults: ""}));
     }
 
+
     render() {
       const flattenedResults = JSON.stringify(this.state.searchResults);
       const clickedString = this.state.clicked.toString();
@@ -60,7 +61,7 @@
         <div>
           <h1>Hello world!</h1>
 
-          <p style={{textAlign:"center"}}><input type="text" placeholder="What are you looking for?" size="65" /></p>
+          <p style={{textAlign:"center"}}><input type="text" onChange={this.handleClick} placeholder="What are you looking for?" size="65" /></p>
 
           <p><button onClick={this.handleClick}>click me</button></p>
           <p>Was button clicked? {clickedString}</p>

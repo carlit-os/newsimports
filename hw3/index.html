@@ -59,16 +59,14 @@
       return (
         <div>
           <h1>Hello world!</h1>
-          <button onClick={this.handleClick}>click me</button>
+          <input type="text" placeholder="What are you looking for?"/>
+
+          <p><button onClick={this.handleClick}>click me</button></p>
           <p>Was button clicked? {clickedString}</p>
           <p>{flattenedResults}</p>
         </div>
 
-        <div class="wrap">
-           <div class="search">
-              <input type="text" class="searchTerm" placeholder="What are you looking for?">
-           </div>
-        </div>
+
 
       );
     }

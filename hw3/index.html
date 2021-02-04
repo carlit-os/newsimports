@@ -66,7 +66,7 @@
     }
 
 
-    render() {
+    render() { //this.state.searchResults.article for iterable
       const flattenedResults = JSON.stringify(this.state.searchResults.articles);
       const clickedString = this.state.clicked.toString();
       return (

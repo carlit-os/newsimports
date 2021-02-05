@@ -42,7 +42,7 @@
       this.handleType = this.handleType.bind(this);
       this.state = {
         clicked : false,
-        searchResults : "",
+        searchResults : "", //changing to fit mapping type
         query : "",
         sequence : 0
       }
@@ -74,7 +74,6 @@
                                                   }
                           }
             )*/
-
         .catch(() => this.setState({searchResults: ""}));
 
     }
@@ -85,7 +84,7 @@
       var txt = article.txt
       var url = article.url
 
-      //var termIdx = txt.substring(txt.indexOf())
+      //var termIdx = txt.substring(txt.indexOf()) for highlighting
     }
 
 
@@ -98,13 +97,13 @@
 
 
 
-
-
+      /*
       if(results !== ""){ //use !== since searchResults can be array or a String
         //searchResults must be an array
          results.articles.forEach(this.handleArticle);
-      }
-
+      }*/
+      //<p><button onClick={this.handleClick}>click me</button></p>
+      //  <p>{flattenedResults}</p> used to be in return body
 
       return (
         <div>
@@ -117,9 +116,14 @@
                                            placeholder="What are you looking for?"
                                            size="65" /></p>
 
-          <p><button onClick={this.handleClick}>click me</button></p>
+          {
+              this.state.searchResults !== ""? this.state.searchResults.articles.map((article) => <div>{article.url}<br/><a href={article.url}>{article.title}</a><br/><br/></div>) : null
+          }
+
+
+
           <p>Was button clicked? {clickedString}</p>
-          <p>{flattenedResults}</p>
+
         </div>
 
 

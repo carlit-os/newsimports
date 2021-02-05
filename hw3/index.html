@@ -87,6 +87,10 @@
       //var termIdx = txt.substring(txt.indexOf()) for highlighting
     }
 
+    handleWrite(article){
+      return article.title
+
+    }
 
     render() { //this.state.searchResults.article for iterable
       //variables
@@ -117,7 +121,7 @@
                                            size="65" /></p>
 
           {
-              this.state.searchResults !== ""? this.state.searchResults.articles.map((article) => <div>{article.url}<br/><a href={article.url}>{article.title}</a><br/><br/></div>) : null
+              this.state.searchResults !== ""? this.state.searchResults.articles.map((article) => <div style={{textAlign:"center"}}><a href={article.url}>{article.title}</a><br/>{this.handleWrite(article)}<br/>{article.url}<br/><br/><br/></div>) : null
           }
 
 

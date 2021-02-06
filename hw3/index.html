@@ -52,11 +52,12 @@
         clicked : false,
         searchResults : "", //changing to fit mapping type
         query : "",
-        sequence : 0
+        sequence : 0,
+        count : 10
       }
     }
 
-    handleClick(e) {
+    handleClick(e) { //not currently running, starter example
       this.setState({clicked: true});
       fetch("https://ssa-hw2-backend.stevetarzia.com/api/search?query=hello")
         .then(response => response.json())
@@ -69,16 +70,13 @@
       this.setState({clicked: true});
 
       //const seqence = this.sequence
-      fetch("https://ssa-hw2-backend.stevetarzia.com/api/search?query="+e.target.value)
+      fetch("https://ssa-hw2-backend.stevetarzia.com/api/search?query="+e.target.value+"&"+this.state.count)
 
 
         .then(response => response.json())
         .then(resultObj => this.setState({searchResults: resultObj}))
         /*.then(response => {
             if(seqence <comparison> this.sequence){
-
-
-
                                                   }
                           }
             )*/
@@ -129,9 +127,10 @@
                                            size="65" /></p>
 
           {
-              this.state.searchResults !== ""? this.state.searchResults.articles.map((article) => <div class='box'><a href={article.url}>{article.title}</a><br/>{this.handleWrite(article)}<br/>{article.url}<br/><br/><br/></div>) : null
+              this.state.searchResults !== ""? this.state.searchResults.articles.map((article) => <div className='box'><a href={article.url}>{article.title}</a><br/>{this.handleWrite(article)}<br/>{article.url}<br/><br/><br/></div>) : null
           }
 
+          <button onClick={this.handleClick}>10 more results</button>
 
 
           <p>Was button clicked? {clickedString}</p>

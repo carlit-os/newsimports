@@ -23,6 +23,10 @@
 
       }
 
+    .loader{
+      text-align: center;
+    }
+
 
 
   </style>
@@ -48,10 +52,10 @@
       super(props);
       this.handleClick = this.handleClick.bind(this);
       this.handleType = this.handleType.bind(this);
+      this.handleMore = this.handleMore.bind(this);
       this.state = {
         clicked : false,
-        searchResults : "", //changing to fit mapping type
-        query : "",
+        searchResults : "",
         sequence : 0,
         count : 10
       }
@@ -65,12 +69,14 @@
         .catch(() => this.setState({searchResults: ""}));
     }
 
-    handleType(e){
+    handleType(e){ //handle searchbox changes
       //this.seqence = this.seqence + 1 //convert to setState
       this.setState({clicked: true});
 
+
+      var strCount = this.state.count.toString()
       //const seqence = this.sequence
-      fetch("https://ssa-hw2-backend.stevetarzia.com/api/search?query="+e.target.value+"&"+this.state.count)
+      fetch("https://ssa-hw2-backend.stevetarzia.com/api/search?query="+e.target.value+"&"+"count="+strCount)
 
 
         .then(response => response.json())
@@ -85,7 +91,7 @@
     }
 
 
-    handleArticle(article, idx){
+    handleArticle(article, idx){ //unsused
       var title = article.title
       var txt = article.txt
       var url = article.url
@@ -93,11 +99,11 @@
       //var termIdx = txt.substring(txt.indexOf()) for highlighting
     }
 
-    handleMore(){
-      this.setState()
+    handleMore(e){ //more results
+      this.setState({ count: this.state.count + 10 });
     }
 
-    handleWrite(article){
+    handleWrite(article){ //highlighting
       return article.title
     }
 
@@ -106,7 +112,7 @@
       const flattenedResults = JSON.stringify(this.state.searchResults.articles);
       const clickedString = this.state.clicked.toString();
 
-      var results = this.state.searchResults //"" or array of results,, [] if no matching
+      var results = this.state.searchResults; //"" or array of results,, [] if no matching
 
 
 
@@ -134,7 +140,7 @@
           }
 
           {this.state.searchResults !== "" && this.state.searchResults.articles.length !== 0 &&
-              <button onClick={this.handleMore}>10 more results</button>
+              <div className='loader'><button onClick={this.handleMore}>10 more results</button></div>
           }
 
           <p>Was button clicked? {clickedString}</p>

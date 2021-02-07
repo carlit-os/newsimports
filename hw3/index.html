@@ -53,6 +53,7 @@
       this.handleClick = this.handleClick.bind(this);
       this.handleType = this.handleType.bind(this);
       this.handleMore = this.handleMore.bind(this);
+      this.handleLess = this.handleLess.bind(this);
       this.state = {
         clicked : false,
         searchResults : "",
@@ -78,7 +79,7 @@
       if(e == "more"){ //more results button was clicked
           var terms = this.state.query;
           var num = this.state.count + 10;
-          strCount = num.toString() 
+          strCount = num.toString()
       } else {
           var terms = e.target.value;
           this.setState({query: terms});
@@ -111,7 +112,10 @@
     handleMore(e){ //more results
       this.setState({ count: this.state.count + 10 });
       this.handleType("more");
+    }
 
+    handleLess(e){ //more results
+      this.setState({ count: 10 });
     }
 
     handleWrite(article){ //highlighting
@@ -145,6 +149,9 @@
                                            onChange={this.handleType}
                                            placeholder="What are you looking for?"
                                            size="65" /></p>
+
+          { (this.state.searchResults !== "" && this.state.searchResults.articles.length == 0)?this.handleLess():null
+          }
 
           {
               this.state.searchResults !== ""? this.state.searchResults.articles.map((article) => <div className='box'><a href={article.url}>{article.title}</a><br/>{this.handleWrite(article)}<br/>{article.url}<br/><br/><br/></div>) : null

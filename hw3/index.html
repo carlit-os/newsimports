@@ -93,9 +93,12 @@
       //var termIdx = txt.substring(txt.indexOf()) for highlighting
     }
 
+    handleMore(){
+      this.setState()
+    }
+
     handleWrite(article){
       return article.title
-
     }
 
     render() { //this.state.searchResults.article for iterable
@@ -130,8 +133,8 @@
               this.state.searchResults !== ""? this.state.searchResults.articles.map((article) => <div className='box'><a href={article.url}>{article.title}</a><br/>{this.handleWrite(article)}<br/>{article.url}<br/><br/><br/></div>) : null
           }
 
-          {this.state.searchResults !== "" && this.state.searchResults.articles !== [] &&
-              <button onClick={this.handleClick}>10 more results</button>
+          {this.state.searchResults !== "" && this.state.searchResults.articles.length !== 0 &&
+              <button onClick={this.handleMore}>10 more results</button>
           }
 
           <p>Was button clicked? {clickedString}</p>

@@ -74,7 +74,7 @@
         .catch(() => this.setState({searchResults: ""}));
     }
 
-    handleType(e){ //handle searchbox changes
+    handleType(e,d){ //handle searchbox changes
       //this.seqence = this.seqence + 1 //convert to setState
       this.setState({clicked: true});
 
@@ -85,6 +85,15 @@
           var terms = this.state.query;
           var num = this.state.count + 10;
           strCount = num.toString();
+
+          if(this.state.isChecked){ //box has been unchecked
+              strLang = "&language=en";
+          }else{ //box has been checked
+            if(terms !== ""){
+              strLang = "";
+            }
+          }
+
       } else if (e == "transl") { //english box changed
           var terms = this.state.query;
 
@@ -95,9 +104,6 @@
               strLang = "&language=en";
             }
           }
-
-
-
       } else {
           var terms = e.target.value;
           if(terms !== ""){
@@ -178,6 +184,8 @@
                                            onChange={this.handleType}
                                            placeholder="What are you looking for?"
                                            size="65" /> <input type="checkbox" id="English" onChange={this.handleChecked}/><label for="English">English Only</label></p>
+
+
 
           { (this.state.searchResults !== "" && this.state.searchResults.articles.length == 0)?this.handleLess():null
           }

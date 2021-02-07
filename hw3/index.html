@@ -167,8 +167,8 @@
 
       return (
         <div>
+          <br/><br/>
 
-          <div className='english'><input type="checkbox" onChange={this.handleChecked}/>English Only</div>
 
 
 
@@ -177,7 +177,7 @@
                                            name="writing"
                                            onChange={this.handleType}
                                            placeholder="What are you looking for?"
-                                           size="65" /></p>
+                                           size="65" /> <input type="checkbox" id="English" onChange={this.handleChecked}/><label for="English">English Only</label></p>
 
           { (this.state.searchResults !== "" && this.state.searchResults.articles.length == 0)?this.handleLess():null
           }

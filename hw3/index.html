@@ -57,7 +57,8 @@
         clicked : false,
         searchResults : "",
         sequence : 0,
-        count : 10
+        count : 10,
+        query : "",
       }
     }
 
@@ -72,12 +73,20 @@
     handleType(e){ //handle searchbox changes
       //this.seqence = this.seqence + 1 //convert to setState
       this.setState({clicked: true});
-
-
       var strCount = this.state.count.toString()
-      //const seqence = this.sequence
-      fetch("https://ssa-hw2-backend.stevetarzia.com/api/search?query="+e.target.value+"&"+"count="+strCount)
 
+      if(e == "more"){ //more results button was clicked
+          var terms = this.state.query;
+          var num = this.state.count + 10;
+          strCount = num.toString() 
+      } else {
+          var terms = e.target.value;
+          this.setState({query: terms});
+      }
+
+
+      //const seqence = this.sequence
+      fetch("https://ssa-hw2-backend.stevetarzia.com/api/search?query="+terms+"&"+"count="+strCount)
 
         .then(response => response.json())
         .then(resultObj => this.setState({searchResults: resultObj}))
@@ -101,6 +110,8 @@
 
     handleMore(e){ //more results
       this.setState({ count: this.state.count + 10 });
+      this.handleType("more");
+
     }
 
     handleWrite(article){ //highlighting
@@ -140,7 +151,16 @@
           }
 
           {this.state.searchResults !== "" && this.state.searchResults.articles.length !== 0 &&
-              <div className='loader'><button onClick={this.handleMore}>10 more results</button></div>
+              <div className='loader'>
+                    <button
+                          onClick={() => {
+                            this.handleMore();
+                          }}>
+
+                          10 more results
+                    </button>
+              </div>
+
           }
 
           <p>Was button clicked? {clickedString}</p>

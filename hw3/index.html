@@ -87,9 +87,16 @@
           strCount = num.toString();
       } else if (e == "transl") { //english box changed
           var terms = this.state.query;
-          if(terms !== ""){
-            strLang = "&language=en";
+
+          if(this.state.isChecked){ //box has been unchecked
+              strLang = "";
+          }else{ //box has been checked
+            if(terms !== ""){
+              strLang = "&language=en";
+            }
           }
+
+
 
       } else {
           var terms = e.target.value;
@@ -136,7 +143,12 @@
 
     handleChecked(e){ //english only
       this.setState({isChecked: !this.state.isChecked});
-      this.setState({lang:"&language=en"});
+      if(this.state.isChecked){ //box has been unchecked
+          this.setState({lang:""});
+      }else{ //box has been checked
+          this.setState({lang:"&language=en"});
+      }
+
       this.handleType("transl");
     }
 
@@ -152,14 +164,6 @@
       var results = this.state.searchResults; //"" or array of results,, [] if no matching
 
 
-
-      /*
-      if(results !== ""){ //use !== since searchResults can be array or a String
-        //searchResults must be an array
-         results.articles.forEach(this.handleArticle);
-      }*/
-      //<p><button onClick={this.handleClick}>click me</button></p>
-      //  <p>{flattenedResults}</p> used to be in return body
 
       return (
         <div>

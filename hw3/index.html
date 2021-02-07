@@ -54,12 +54,15 @@
       this.handleType = this.handleType.bind(this);
       this.handleMore = this.handleMore.bind(this);
       this.handleLess = this.handleLess.bind(this);
+      this.handleChecked = this.handleChecked.bind(this);
       this.state = {
         clicked : false,
         searchResults : "",
         sequence : 0,
         count : 10,
         query : "",
+        lang : "",
+        isChecked: false
       }
     }
 
@@ -74,20 +77,33 @@
     handleType(e){ //handle searchbox changes
       //this.seqence = this.seqence + 1 //convert to setState
       this.setState({clicked: true});
+
       var strCount = this.state.count.toString()
+      var strLang = ""
 
       if(e == "more"){ //more results button was clicked
           var terms = this.state.query;
           var num = this.state.count + 10;
-          strCount = num.toString()
+          strCount = num.toString();
+      } else if (e == "transl") { //english box changed
+          var terms = this.state.query;
+          if(terms !== ""){
+            strLang = "&language=en";
+          }
+
       } else {
           var terms = e.target.value;
+          if(terms !== ""){
+            strLang=this.state.lang; //no lang for no query
+          }
           this.setState({query: terms});
       }
 
 
+
+
       //const seqence = this.sequence
-      fetch("https://ssa-hw2-backend.stevetarzia.com/api/search?query="+terms+"&"+"count="+strCount)
+      fetch("https://ssa-hw2-backend.stevetarzia.com/api/search?query="+terms+"&"+"count="+strCount+strLang)
 
         .then(response => response.json())
         .then(resultObj => this.setState({searchResults: resultObj}))
@@ -118,6 +134,12 @@
       this.setState({ count: 10 });
     }
 
+    handleChecked(e){ //english only
+      this.setState({isChecked: !this.state.isChecked});
+      this.setState({lang:"&language=en"});
+      this.handleType("transl");
+    }
+
     handleWrite(article){ //highlighting
       return article.title
     }
@@ -141,7 +163,10 @@
 
       return (
         <div>
-          <p>results</p>
+
+          <div className='english'><input type="checkbox" onChange={this.handleChecked}/>English Only</div>
+
+
 
           <p style={{textAlign:"center"}}><input
                                            type="text"
@@ -160,10 +185,7 @@
           {this.state.searchResults !== "" && this.state.searchResults.articles.length !== 0 &&
               <div className='loader'>
                     <button
-                          onClick={() => {
-                            this.handleMore();
-                          }}>
-
+                          onClick={this.handleMore}>
                           10 more results
                     </button>
               </div>

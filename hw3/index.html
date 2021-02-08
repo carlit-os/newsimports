@@ -55,6 +55,7 @@
       this.handleMore = this.handleMore.bind(this);
       this.handleLess = this.handleLess.bind(this);
       this.handleChecked = this.handleChecked.bind(this);
+      this.handleTime = this.handleTime.bind(this);
       this.state = {
         clicked : false,
         searchResults : "",
@@ -62,17 +63,18 @@
         count : 10,
         query : "",
         lang : "",
-        isChecked: false
+        isChecked: false,
+        daySet: "",
+        dayBox: ""
       }
     }
 
-    handleClick(e) { //not currently running, starter example
-      this.setState({clicked: true});
-      fetch("https://ssa-hw2-backend.stevetarzia.com/api/search?query=hello")
-        .then(response => response.json())
-        .then(resultObj => this.setState({searchResults: resultObj}))
-        .catch(() => this.setState({searchResults: ""}));
+    handleClick(e) {
+      var boxy = "&date="+this.state.dayBox
+      this.setState({daySet:boxy})
+      this.handleType("time",boxy)
     }
+
 
     handleType(e,d){ //handle searchbox changes
       //this.seqence = this.seqence + 1 //convert to setState
@@ -80,6 +82,7 @@
 
       var strCount = this.state.count.toString()
       var strLang = ""
+      var strDate = this.state.daySet
 
       if(e == "more"){ //more results button was clicked
           var terms = this.state.query;
@@ -104,6 +107,13 @@
               strLang = "&language=en";
             }
           }
+      } else if (e == "time"){
+         var terms = this.state.query;
+         strDate = d
+         if(terms !== ""){
+           strLang=this.state.lang; //no lang for no query
+         }
+
       } else {
           var terms = e.target.value;
           if(terms !== ""){
@@ -116,7 +126,7 @@
 
 
       //const seqence = this.sequence
-      fetch("https://ssa-hw2-backend.stevetarzia.com/api/search?query="+terms+"&"+"count="+strCount+strLang)
+      fetch("https://ssa-hw2-backend.stevetarzia.com/api/search?query="+terms+"&"+"count="+strCount+strLang+strDate)
 
         .then(response => response.json())
         .then(resultObj => this.setState({searchResults: resultObj}))
@@ -129,6 +139,7 @@
 
     }
 
+///////////////////////helper functions////////////////////////////////////////////////////////////////////////
 
     handleArticle(article, idx){ //unsused
       var title = article.title
@@ -162,6 +173,10 @@
       return article.title
     }
 
+    handleTime(e){
+        this.setState({dayBox: e.target.value});
+    }
+
     render() { //this.state.searchResults.article for iterable
       //variables
       const flattenedResults = JSON.stringify(this.state.searchResults.articles);
@@ -184,6 +199,8 @@
                                            onChange={this.handleType}
                                            placeholder="What are you looking for?"
                                            size="65" /> <input type="checkbox" id="English" onChange={this.handleChecked}/><label for="English">English Only</label></p>
+
+          <div style={{textAlign:"center"}}><input type="date" onChange={this.handleTime} placeholder="YYYY-MM-DD" size="10"/>  <button onClick={this.handleClick}>Submit Date</button> </div>
 
 
 

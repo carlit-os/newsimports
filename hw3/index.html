@@ -67,7 +67,8 @@
         isChecked: false,
         daySet: "",
         dayBox: "",
-        sequence: 0
+        sequence: 0,
+        display: 0
       }
     }
 
@@ -124,7 +125,7 @@
           this.setState({query: terms});
       }
 
-      setTimeout(() => {this.updateFetch(terms,strCount,strLang,strDate)}, 100); //} //fetching conflicts with state changes
+      setTimeout(() => {this.updateFetch(terms,strCount,strLang,strDate)}, 50); //} //fetching conflicts with state changes
 
       //this.updateFetch(terms,strCount,strLang,strDate)
       //const seqence = this.sequence
@@ -134,16 +135,21 @@
 
     updateFetch(terms,strCount,strLang,strDate){
 
-      var sequence = this.state.sequence+1;
+      var seq = this.state.sequence+1; //changes with reqeusts
+      this.setState({sequence: seq}); //update global
+
 
       fetch("https://ssa-hw2-backend.stevetarzia.com/api/search?query="+terms+"&"+"count="+strCount+strLang+strDate)
         .then(response => response.json())
-        .then(resultObj => this.setState({searchResults: resultObj}))
-        /*.then(response => {
-            if(seqence <comparison> this.sequence){
-                                                  }
-                          }
-            )*/
+        .then(resultObj => {
+            if(seq < this.state.display){
+                return;
+            }else{
+                this.setState({searchResults: resultObj});
+                this.setState({display: seq});
+            }
+
+        })
         .catch(() => this.setState({searchResults: ""}));
 
     }
@@ -218,13 +224,10 @@
           <div style={{textAlign:"center"}}><input type="date" onChange={this.handleTime} placeholder="YYYY-MM-DD" size="10"/>  <button onClick={this.handleClick}>Submit Date</button> </div>
 
 
+          { (this.state.searchResults !== "" && this.state.searchResults.articles.length == 0)?this.handleLess():null }
 
-          { (this.state.searchResults !== "" && this.state.searchResults.articles.length == 0)?this.handleLess():null
-          }
 
-          {
-              this.state.searchResults !== ""? this.state.searchResults.articles.map((article) => <div className='box'><a href={article.url}>{article.title}</a><br/>{this.handleWrite(article)}<br/>{article.url}<br/><br/><br/></div>) : null
-          }
+          {this.state.searchResults !== ""? this.state.searchResults.articles.map((article) => <div className='box'><a href={article.url}>{article.title}</a><br/>{this.handleWrite(article)}<br/>{article.url}<br/><br/><br/></div>) : null}
 
           {this.state.searchResults !== "" && this.state.searchResults.articles.length !== 0 &&
               <div className='loader'>

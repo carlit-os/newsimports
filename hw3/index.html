@@ -124,6 +124,8 @@
 
 
 
+      //setTimeout(() => {this.updatefetch()}, 50); } //fetching conflicts with state changes
+
 
       //const seqence = this.sequence
       fetch("https://ssa-hw2-backend.stevetarzia.com/api/search?query="+terms+"&"+"count="+strCount+strLang+strDate)
@@ -170,7 +172,13 @@
     }
 
     handleWrite(article){ //highlighting
-      return article.title
+      var title = article.title;
+       var script = article.txt;
+       var term = this.state.query;
+
+
+       return script.substring(script.indexOf(term),script.indexOf(term)+100);
+
     }
 
     handleTime(e){
@@ -221,7 +229,6 @@
 
           }
 
-          <p>Was button clicked? {clickedString}</p>
 
         </div>
 

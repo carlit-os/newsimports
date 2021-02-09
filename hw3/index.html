@@ -56,6 +56,7 @@
       this.handleLess = this.handleLess.bind(this);
       this.handleChecked = this.handleChecked.bind(this);
       this.handleTime = this.handleTime.bind(this);
+      this.updateFetch = this.updateFetch.bind(this);
       this.state = {
         clicked : false,
         searchResults : "",
@@ -65,7 +66,8 @@
         lang : "",
         isChecked: false,
         daySet: "",
-        dayBox: ""
+        dayBox: "",
+        sequence: 0
       }
     }
 
@@ -122,14 +124,19 @@
           this.setState({query: terms});
       }
 
+      setTimeout(() => {this.updateFetch(terms,strCount,strLang,strDate)}, 100); //} //fetching conflicts with state changes
 
-
-      //setTimeout(() => {this.updatefetch()}, 50); } //fetching conflicts with state changes
-
-
+      //this.updateFetch(terms,strCount,strLang,strDate)
       //const seqence = this.sequence
-      fetch("https://ssa-hw2-backend.stevetarzia.com/api/search?query="+terms+"&"+"count="+strCount+strLang+strDate)
 
+    }
+
+
+    updateFetch(terms,strCount,strLang,strDate){
+
+      var sequence = this.state.sequence+1;
+
+      fetch("https://ssa-hw2-backend.stevetarzia.com/api/search?query="+terms+"&"+"count="+strCount+strLang+strDate)
         .then(response => response.json())
         .then(resultObj => this.setState({searchResults: resultObj}))
         /*.then(response => {

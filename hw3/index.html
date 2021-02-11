@@ -118,9 +118,10 @@
           }
       } else if (e == "time"){
          var terms = this.state.query;
-         strDate = d
+
          if(terms !== ""){
            strLang=this.state.lang; //no lang for no query
+           strDate = d
          }
 
       } else {
@@ -143,6 +144,10 @@
 
       var seq = this.state.sequence+1; //changes with reqeusts
       this.setState({sequence: seq}); //update global
+
+      if(terms == ""){
+        strDate = ""
+      }
 
 
       fetch("https://ssa-hw2-backend.stevetarzia.com/api/search?query="+terms+"&"+"count="+strCount+strLang+strDate)

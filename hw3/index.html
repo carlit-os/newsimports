@@ -32,6 +32,11 @@
       padding-bottom: 20px;
     }
 
+    .writing{
+      padding-top: :80px;
+
+    }
+
 
 
   </style>
@@ -224,7 +229,12 @@
       var results = this.state.searchResults; //"" or array of results,, [] if no matching
 
       const makeBold = (item, keyword) => {
+        try{
         var re = new RegExp(keyword, 'i')
+      }catch(e){
+        var re = new RegExp("error", 'i')
+      }
+
 
         var idx = 0
         var finalchar = 0
@@ -271,7 +281,7 @@
           { (this.state.searchResults !== "" && this.state.searchResults.articles.length == 0)?this.handleLess():null }
 
 
-          {this.state.searchResults !== ""? this.state.searchResults.articles.map((article) => <div className='box'><a href={article.url}>{article.title}</a><br/>  <div dangerouslySetInnerHTML={{__html: makeBold(article.txt, this.state.query)}} /> <br/>{article.url}<br/><br/><br/></div>) : null}
+          {this.state.searchResults !== ""? this.state.searchResults.articles.map((article) => <div className='box'><a href={article.url}>{article.title}</a><br/>  <div className='writing' dangerouslySetInnerHTML={{__html: makeBold(article.txt, this.state.query)}} /> <br/>{article.url}<br/><br/><br/></div>) : null}
 
 
           {this.state.searchResults !== "" && this.state.searchResults.articles.length !== 0 &&

@@ -33,7 +33,8 @@
     }
 
     .writing{
-      padding-top: :80px;
+      padding-top: 10px;
+      padding-bottom: 5px;
 
     }
 
@@ -292,7 +293,7 @@
           { (this.state.searchResults !== "" && this.state.searchResults.articles.length == 0)?this.handleLess():null }
 
 
-          {this.state.searchResults !== ""? this.state.searchResults.articles.map((article) => <div className='box'><a href={article.url}>{article.title}</a><br/>  <div className='writing' dangerouslySetInnerHTML={{__html: makeBold(article.txt, this.state.query)}} /> <br/>{article.url}<br/><br/><br/></div>) : null}
+          {this.state.searchResults !== ""? this.state.searchResults.articles.map((article) => <div className='box'><a href={article.url}>{article.title}</a><br/>  <div className='writing' dangerouslySetInnerHTML={{__html: makeBold(article.txt, this.state.query)}} /> {article.url}<br/><br/><br/></div>) : null}
 
 
           {this.state.searchResults !== "" && this.state.searchResults.articles.length !== 0 &&
